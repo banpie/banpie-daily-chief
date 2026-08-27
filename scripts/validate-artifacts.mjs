@@ -29,7 +29,8 @@ function walk(directory) {
     return statSync(path).isDirectory() ? walk(path) : [path];
   });
 }
-const textFiles = walk(resolve(".")).filter((path) => !path.includes("node_modules") && !path.includes("/.git/") && !path.endsWith("scripts/validate-artifacts.mjs") && /\.(md|ts|tsx|js|mjs|json|ya?ml)$/.test(path));
+const validatorPath = resolve("scripts/validate-artifacts.mjs");
+const textFiles = walk(resolve(".")).filter((path) => !path.includes("node_modules") && !/[\\/]\.git[\\/]/.test(path) && path !== validatorPath && /\.(md|ts|tsx|js|mjs|json|ya?ml)$/.test(path));
 const forbidden = [new RegExp("\\/Users\\/" + "ban" + "pie", "i"), /iCloud~md~obsidian/i, /BEGIN (RSA |OPENSSH )?PRIVATE KEY/i, /gho_[A-Za-z0-9]{20,}/];
 for (const path of textFiles) {
   const content = readFileSync(path, "utf8");
