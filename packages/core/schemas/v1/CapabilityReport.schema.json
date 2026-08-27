@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "agent_host": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operating_system": {
+      "type": "string",
+      "minLength": 1
+    },
+    "node_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scheduler_available": {
+      "type": "boolean"
+    },
+    "notification_available": {
+      "type": "boolean"
+    },
+    "adapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "adapter_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "api_version": {
+            "type": "string",
+            "const": "1.0"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "calendar.read",
+                "tasks.read",
+                "mail.read",
+                "notes.read",
+                "signals.read",
+                "notification.send",
+                "schedule.create",
+                "local.tasks.write"
+              ]
+            }
+          },
+          "host": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operating_system": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "needs_login": {
+            "default": false,
+            "type": "boolean"
+          },
+          "read_only": {
+            "default": true,
+            "type": "boolean"
+          },
+          "last_success_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "failure_reason": {
+            "type": "string"
+          },
+          "recovery_hint": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "adapter_id",
+          "api_version",
+          "capabilities",
+          "host",
+          "operating_system",
+          "provider",
+          "available",
+          "needs_login",
+          "read_only"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "local_database": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        },
+        "writable": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "available",
+        "path",
+        "writable"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "checked_at",
+    "agent_host",
+    "operating_system",
+    "node_version",
+    "scheduler_available",
+    "notification_available",
+    "adapters",
+    "local_database"
+  ],
+  "additionalProperties": false,
+  "$id": "https://schemas.banpie.info/daily-chief/v1/CapabilityReport.schema.json"
+}

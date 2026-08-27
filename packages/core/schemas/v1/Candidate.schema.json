@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "event",
+        "task",
+        "mail",
+        "signal"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_ref": {
+      "type": "string"
+    },
+    "external_id": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "start_at": {
+      "$ref": "#/$defs/__schema0"
+    },
+    "end_at": {
+      "$ref": "#/$defs/__schema0"
+    },
+    "due_at": {
+      "$ref": "#/$defs/__schema0"
+    },
+    "plan_date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "actor": {
+      "default": "self",
+      "type": "string",
+      "enum": [
+        "self",
+        "other",
+        "unknown"
+      ]
+    },
+    "estimate_minutes": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 720
+    },
+    "next_action": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "risk": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "inbox",
+        "next",
+        "waiting",
+        "someday",
+        "done",
+        "canceled"
+      ]
+    },
+    "priority": {
+      "default": "p2",
+      "type": "string",
+      "enum": [
+        "p0",
+        "p1",
+        "p2",
+        "p3"
+      ]
+    },
+    "all_day": {
+      "default": false,
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 5000
+    }
+  },
+  "required": [
+    "candidate_id",
+    "kind",
+    "title",
+    "source_id",
+    "actor",
+    "priority",
+    "all_day"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    }
+  },
+  "$id": "https://schemas.banpie.info/daily-chief/v1/Candidate.schema.json"
+}

@@ -1,0 +1,42 @@
+{
+  "name": "banpie-daily-chief",
+  "version": "0.3.0-beta.1",
+  "private": true,
+  "description": "半撇每日参谋：本地优先、宿主无关的每日规划工具",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "node scripts/sync-plugin-skills.mjs && npm run build -w @banpie/daily-chief-core && npm run build -w @banpie/daily-chief-web && npm run build -w @banpie/daily-chief-cli",
+    "dev": "npm run dev -w @banpie/daily-chief-web",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run test && npm run build && npm run validate:artifacts",
+    "validate:artifacts": "node scripts/validate-artifacts.mjs",
+    "package:release": "node scripts/sync-plugin-skills.mjs && node scripts/package-release.mjs",
+    "clean": "node scripts/clean.mjs"
+  },
+  "devDependencies": {
+    "@types/archiver": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.68.0",
+    "@typescript-eslint/parser": "^8.68.0",
+    "archiver": "^8.0.0",
+    "eslint": "^10.9.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.11"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true,
+    "esbuild@0.27.7": true,
+    "fsevents@2.3.3": true
+  }
+}

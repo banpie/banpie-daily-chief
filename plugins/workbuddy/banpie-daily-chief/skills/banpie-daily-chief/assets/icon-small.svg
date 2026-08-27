@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="半撇每日参谋">
+  <rect width="64" height="64" rx="17" fill="#21322C"/>
+  <path d="M18 20h28M18 31h18M18 42h23" fill="none" stroke="#FFF8EB" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="45" cy="42" r="5" fill="#CF6F44"/>
+</svg>
+

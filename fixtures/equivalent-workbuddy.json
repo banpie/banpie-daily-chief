@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "fixture-workbuddy-tasks",
+  "source_id": "workbuddy.todo-provider",
+  "capability": "tasks.read",
+  "captured_at": "2026-08-27T08:00:00+08:00",
+  "timezone": "Asia/Shanghai",
+  "status": "ok",
+  "expires_at": "2026-08-27T10:00:00+08:00",
+  "items": [
+    {
+      "candidate_id": "wb-42",
+      "kind": "task",
+      "title": "完成公开版说明",
+      "source_id": "workbuddy.todo-provider",
+      "source_ref": "https://tasks.example/42",
+      "due_at": "2026-08-27T18:00:00+08:00",
+      "actor": "self",
+      "estimate_minutes": 60,
+      "priority": "p1",
+      "all_day": false
+    }
+  ]
+}
+

@@ -1,0 +1,12 @@
+{
+  "name": "banpie-daily-chief",
+  "version": "0.3.0-beta.1",
+  "description": "本地优先的每日规划、任务收集箱和来源能力体检",
+  "author": {
+    "name": "Banpie"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["daily-planning", "tasks", "local-first", "productivity"],
+  "skills": "./skills/"
+}
+
