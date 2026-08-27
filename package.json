@@ -17,7 +17,7 @@
     "dev": "npm run dev -w @banpie/daily-chief-web",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run build -w @banpie/daily-chief-core && npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "check": "npm run typecheck && npm run test && npm run build && npm run validate:artifacts",
     "validate:artifacts": "node scripts/validate-artifacts.mjs",
