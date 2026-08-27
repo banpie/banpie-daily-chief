@@ -1,7 +1,8 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type DatabaseType from "better-sqlite3";
 import {
   dailyBriefSchema,
   defaultSettings,
@@ -30,9 +31,29 @@ interface RunLog {
 type NewTask = Partial<Omit<Task, "task_id" | "created_at" | "updated_at">> & Pick<Task, "title">;
 type NewProject = Partial<Omit<Project, "project_id" | "created_at" | "updated_at">> & Pick<Project, "title">;
 
+const require = createRequire(import.meta.url);
+
+function loadDatabase(): typeof DatabaseType {
+  const major = Number(process.versions.node.split(".")[0]);
+  const candidates = major <= 20
+    ? ["better-sqlite3-node20", "better-sqlite3-modern"]
+    : ["better-sqlite3-modern", "better-sqlite3-node20"];
+  const errors: string[] = [];
+  for (const packageName of candidates) {
+    try {
+      return require(packageName) as typeof DatabaseType;
+    } catch (error) {
+      errors.push(`${packageName}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  throw new Error(`No compatible SQLite runtime is installed for Node ${process.versions.node}. ${errors.join(" | ")}`);
+}
+
+const Database = loadDatabase();
+
 export class DailyChiefDatabase {
   readonly path: string;
-  private readonly db: Database.Database;
+  private readonly db: DatabaseType.Database;
 
   constructor(path: string) {
     this.path = path;
@@ -303,4 +324,3 @@ export class DailyChiefDatabase {
 }
 
 export type { RunLog, NewTask, NewProject };
-
