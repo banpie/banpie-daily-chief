@@ -31,6 +31,45 @@ const runtimeNode = join(runtime, "bin", platform() === "win32" ? "node.exe" : "
 const cli = join(runtime, "app", "node_modules", "@banpie", "daily-chief-cli", "dist", "index.js");
 const argumentsSet = new Set(process.argv.slice(2));
 
+function pause(milliseconds) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
+function renameWithRetry(source, destination) {
+  const retryable = new Set(["EBUSY", "ENOTEMPTY", "EPERM"]);
+  const attempts = platform() === "win32" ? 15 : 1;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      renameSync(source, destination);
+      return;
+    } catch (error) {
+      if (!retryable.has(error?.code) || attempt === attempts - 1) throw error;
+      pause(Math.min(50 * 2 ** attempt, 1_000));
+    }
+  }
+}
+
+function updateCurrentPointer() {
+  const pointer = join(root, "runtime", "current.json");
+  const pointerDraft = `${pointer}.${randomUUID()}.tmp`;
+  const pointerBackup = `${pointer}.${randomUUID()}.backup`;
+  writeFileSync(pointerDraft, `${JSON.stringify({ version: VERSION, installed_at: new Date().toISOString() }, null, 2)}\n`);
+  let pointerMoved = false;
+  try {
+    if (existsSync(pointer)) {
+      renameWithRetry(pointer, pointerBackup);
+      pointerMoved = true;
+    }
+    renameWithRetry(pointerDraft, pointer);
+    if (pointerMoved && existsSync(pointerBackup)) rmSync(pointerBackup, { force: true });
+  } catch (error) {
+    if (!existsSync(pointer) && pointerMoved && existsSync(pointerBackup)) renameWithRetry(pointerBackup, pointer);
+    throw error;
+  } finally {
+    if (existsSync(pointerDraft)) rmSync(pointerDraft, { force: true });
+  }
+}
+
 if (argumentsSet.has("--print-path")) {
   process.stdout.write(`${cli}\n`);
   process.exit(0);
@@ -52,6 +91,7 @@ if (argumentsSet.has("--uninstall")) {
 }
 
 if (existsSync(runtimeNode) && existsSync(cli)) {
+  updateCurrentPointer();
   process.stdout.write(`半撇每日参谋 ${VERSION} 已安装：${cli}\n`);
   process.exit(0);
 }
@@ -101,16 +141,13 @@ try {
   const smoke = spawnSync(candidateNode, [candidateCli, "--version"], { encoding: "utf8", windowsHide: true });
   if (smoke.status !== 0 || !smoke.stdout.includes(VERSION)) throw new Error(`运行时自检失败：${smoke.stderr || smoke.stdout}`);
 
-  if (existsSync(runtime)) { renameSync(runtime, backup); previousMoved = true; }
-  renameSync(candidate, runtime);
-  const pointer = join(root, "runtime", "current.json");
-  const pointerDraft = `${pointer}.${randomUUID()}.tmp`;
-  writeFileSync(pointerDraft, `${JSON.stringify({ version: VERSION, installed_at: new Date().toISOString() }, null, 2)}\n`);
-  renameSync(pointerDraft, pointer);
+  if (existsSync(runtime)) { renameWithRetry(runtime, backup); previousMoved = true; }
+  renameWithRetry(candidate, runtime);
+  updateCurrentPointer();
   if (previousMoved && existsSync(backup)) rmSync(backup, { recursive: true, force: true });
   process.stdout.write(`半撇每日参谋 ${VERSION} 已安装并通过校验：${cli}\n`);
 } catch (error) {
-  if (previousMoved && !existsSync(runtime) && existsSync(backup)) renameSync(backup, runtime);
+  if (previousMoved && !existsSync(runtime) && existsSync(backup)) renameWithRetry(backup, runtime);
   throw error;
 } finally {
   if (existsSync(candidate)) rmSync(candidate, { recursive: true, force: true });

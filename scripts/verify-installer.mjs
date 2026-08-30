@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
@@ -62,6 +62,10 @@ try {
   const runtimeNode = join(installed, "bin", process.platform === "win32" ? "node.exe" : "node");
   const runtimeCli = join(installed, "app", "node_modules", "@banpie", "daily-chief-cli", "dist", "index.js");
   if (!existsSync(runtimeNode) || !existsSync(runtimeCli)) throw new Error("Installed runtime is incomplete");
+  const pointer = join(runtimeRoot, "runtime", "current.json");
+  writeFileSync(pointer, `${JSON.stringify({ version: "previous-version" })}\n`);
+  await run(process.execPath, [installer], environment);
+  if (JSON.parse(readFileSync(pointer, "utf8")).version !== version) throw new Error("Reinstall did not atomically refresh current.json");
   await run(runtimeNode, [runtimeCli, "--database", databasePath, "seed-demo"], environment);
   if (!existsSync(databasePath)) throw new Error("Verification task database was not created");
 
