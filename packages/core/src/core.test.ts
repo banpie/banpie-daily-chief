@@ -128,6 +128,19 @@ describe("normalization and planning", () => {
     const minutes = (kind?: string) => editable.filter((block) => !kind || block.kind === kind).reduce((total, block) => total + (new Date(block.end_at).getTime() - new Date(block.start_at).getTime()) / 60000, 0);
     expect(minutes("buffer") / minutes()).toBeGreaterThanOrEqual(0.19);
   });
+
+  it("does not let an expired successful snapshot masquerade as fresh data", () => {
+    const directory = mkdtempSync(join(tmpdir(), "daily-chief-test-"));
+    tempDirectories.push(directory);
+    const db = new DailyChiefDatabase(join(directory, "data.sqlite"));
+    db.saveSnapshot(snapshot({ expires_at: "2026-08-26T23:59:00Z" }));
+    const [expired] = db.latestSnapshots(now);
+    expect(expired).toMatchObject({ status: "stale", items: [], failure_reason: "Snapshot expired before this run." });
+    const brief = generateDailyBrief({ date: "2026-08-27", now, settings: defaultSettings, snapshots: [expired!] });
+    expect(brief.actions).toHaveLength(0);
+    expect(brief.source_status[0]).toMatchObject({ status: "stale", item_count: null });
+    db.close();
+  });
 });
 
 describe("SQLite local task manager", () => {
@@ -212,6 +225,19 @@ describe("SQLite local task manager", () => {
     expect(db.isTaskOccurrenceCompleted(task.task_id, "2026-08-27")).toBe(true);
     db.reopenTaskOccurrence(task.task_id, "2026-08-27");
     expect(db.isTaskOccurrenceCompleted(task.task_id, "2026-08-27")).toBe(false);
+    db.close();
+  });
+
+  it("keeps daily and monthly recurrence dates correct across daylight saving time", () => {
+    const directory = mkdtempSync(join(tmpdir(), "daily-chief-test-"));
+    tempDirectories.push(directory);
+    const db = new DailyChiefDatabase(join(directory, "data.sqlite"));
+    const daily = db.createTask({ title: "每日整理", recurrence_rrule: "FREQ=DAILY", recurrence_start_date: "2026-03-07" });
+    const monthly = db.createTask({ title: "每月核对", recurrence_rrule: "FREQ=MONTHLY", recurrence_start_date: "2026-01-31" });
+    expect(taskOccursOn(daily, "2026-03-08", "America/New_York")).toBe(true);
+    expect(taskOccursOn(daily, "2026-11-01", "America/New_York")).toBe(true);
+    expect(taskOccursOn(monthly, "2026-03-31", "America/New_York")).toBe(true);
+    expect(taskOccursOn(monthly, "2026-04-30", "America/New_York")).toBe(false);
     db.close();
   });
 

@@ -60,6 +60,18 @@ test("本地任务和项目可以完整维护", async ({ page }) => {
   await expect(page.getByText("新人十分钟看到首份预览")).toBeVisible();
 });
 
+test("无插件、登录过期和读取超时均可见且不阻断简报", async ({ page }) => {
+  await page.goto("/connections?token=daily-chief-e2e-token");
+  await expect(page.getByRole("heading", { name: "连接" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "gmail" })).toBeVisible();
+  await expect(page.getByText("Login expired")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "outlook" })).toBeVisible();
+  await expect(page.getByText("Read timed out")).toBeVisible();
+  await page.getByRole("link", { name: "今天" }).click();
+  await expect(page.getByText("部分来源不可用，已用可用信息降级生成。")).toBeVisible();
+  await expect(page.getByText("完成新人验收报告", { exact: true }).first()).toBeVisible();
+});
+
 test("日计划阻止无效时间并适配手机宽度", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/?token=daily-chief-e2e-token");
