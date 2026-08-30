@@ -40,10 +40,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14
+          - os: macos-15
             node: 22
             label: macos-arm64
-          - os: macos-13
+          - os: macos-15-intel
             node: 22
             label: macos-x64
           - os: windows-latest
