@@ -25,6 +25,11 @@ for (const manifest of manifests) {
   if (manifest.name !== "banpie-daily-chief" || manifest.version !== "0.4.0-beta.1") throw new Error("Plugin manifest name/version mismatch.");
 }
 
+const installerSource = readFileSync(resolve("skills/banpie-daily-chief/scripts/install.mjs"), "utf8");
+if (!installerSource.includes('spawnSync("tar.exe"') || !installerSource.includes('spawnSync("powershell.exe"')) {
+  throw new Error("Windows installer must prefer tar.exe and retain the PowerShell compatibility fallback.");
+}
+
 function walk(directory) {
   return readdirSync(directory).flatMap((name) => {
     const path = resolve(directory, name);

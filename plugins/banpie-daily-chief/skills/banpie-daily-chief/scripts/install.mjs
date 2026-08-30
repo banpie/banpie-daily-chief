@@ -78,9 +78,20 @@ try {
   const actual = createHash("sha256").update(archiveBytes).digest("hex");
   if (expected !== actual) throw new Error(`SHA-256 校验失败：期望 ${expected}，实际 ${actual}`);
 
-  const extraction = platform() === "win32"
-    ? spawnSync("powershell.exe", ["-NoProfile", "-Command", "& { param($archive, $target) Expand-Archive -LiteralPath $archive -DestinationPath $target -Force }", archive, candidate], { stdio: "inherit", windowsHide: true })
-    : spawnSync("unzip", ["-q", archive, "-d", candidate], { stdio: "inherit" });
+  let extraction;
+  if (platform() === "win32") {
+    // Windows ships bsdtar, which is much faster than Expand-Archive for a
+    // runtime containing thousands of small files. Retain PowerShell as a
+    // compatibility fallback for older or customized systems.
+    extraction = spawnSync("tar.exe", ["-xf", archive, "-C", candidate], { stdio: "inherit", windowsHide: true });
+    if (extraction.status !== 0) {
+      rmSync(candidate, { recursive: true, force: true });
+      mkdirSync(candidate, { recursive: true });
+      extraction = spawnSync("powershell.exe", ["-NoProfile", "-Command", "& { param($archive, $target) Expand-Archive -LiteralPath $archive -DestinationPath $target -Force }", archive, candidate], { stdio: "inherit", windowsHide: true });
+    }
+  } else {
+    extraction = spawnSync("unzip", ["-q", archive, "-d", candidate], { stdio: "inherit" });
+  }
   if (extraction.status !== 0) throw new Error("无法解压预构建运行时。");
 
   const candidateNode = join(candidate, "bin", platform() === "win32" ? "node.exe" : "node");

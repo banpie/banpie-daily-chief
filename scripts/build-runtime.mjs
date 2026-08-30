@@ -30,6 +30,20 @@ function runNpm(args, options = {}) {
   return run("npm", args, options);
 }
 
+function extractZip(archivePath, destination) {
+  if (process.platform !== "win32") {
+    run("unzip", ["-q", archivePath, "-d", destination]);
+    return;
+  }
+  try {
+    run("tar.exe", ["-xf", archivePath, "-C", destination]);
+  } catch {
+    rmSync(destination, { recursive: true, force: true });
+    mkdirSync(destination, { recursive: true });
+    run("powershell.exe", ["-NoProfile", "-Command", "& { param($archive, $target) Expand-Archive -LiteralPath $archive -DestinationPath $target -Force }", archivePath, destination]);
+  }
+}
+
 function pack(workspace) {
   const output = runNpm(["pack", "--json", "--pack-destination", temporary], { cwd: resolve(workspace) });
   const result = JSON.parse(output);
@@ -52,7 +66,7 @@ async function installPortableNode(destination) {
   const extractRoot = join(temporary, "node-distribution");
   mkdirSync(extractRoot, { recursive: true });
   if (process.platform === "win32") {
-    run("powershell.exe", ["-NoProfile", "-Command", "& { param($archive, $target) Expand-Archive -LiteralPath $archive -DestinationPath $target -Force }", archivePath, extractRoot]);
+    extractZip(archivePath, extractRoot);
   } else {
     run("tar", [process.platform === "darwin" ? "-xzf" : "-xJf", archivePath, "-C", extractRoot]);
   }
@@ -90,7 +104,7 @@ try {
   const extracted = join(temporary, "extracted");
   mkdirSync(extracted, { recursive: true });
   if (process.platform === "win32") {
-    run("powershell.exe", ["-NoProfile", "-Command", "& { param($archive, $target) Expand-Archive -LiteralPath $archive -DestinationPath $target -Force }", destination, extracted]);
+    extractZip(destination, extracted);
   } else {
     run("unzip", ["-q", destination, "-d", extracted]);
   }
