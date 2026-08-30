@@ -24,8 +24,11 @@
   },
   "stable_release": {
     "ci_workflow_run": 33327298924,
-    "release_workflow_run": "PENDING_STABLE_RELEASE",
-    "artifacts_verified": false
+    "release_workflow_run": 33327456738,
+    "artifacts_verified": true,
+    "sha256sums_sha256": "417d3337ec7ca46aaaef42a46ef3845c1d5cc23ada2a16f93bdc9f5de6516949",
+    "runtime_cli_version": "1.0.0",
+    "runtime_node_version": "v22.23.2"
   },
   "npm": {
     "core": "PENDING_NPM_CORE",
