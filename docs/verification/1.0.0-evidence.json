@@ -9,6 +9,8 @@
     "workbuddy_natural_language_seconds": 128,
     "codex_native_schedule": "passed",
     "workbuddy_native_schedule": "passed",
+    "codex_stable_market_install": "passed",
+    "workbuddy_stable_market_install": "passed",
     "normalized_host_equivalence": true,
     "unit_tests": 30,
     "playwright_paths": 5,
