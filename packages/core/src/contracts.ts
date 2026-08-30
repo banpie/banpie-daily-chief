@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const API_VERSION = "1.0" as const;
-export const CORE_VERSION = "1.0.0-rc.1" as const;
+export const CORE_VERSION = "1.0.0" as const;
 
 export const capabilitySchema = z.enum([
   "calendar.read",

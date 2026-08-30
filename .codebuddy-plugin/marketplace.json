@@ -5,14 +5,14 @@
     "name": "Banpie"
   },
   "metadata": {
-    "version": "1.0.0-rc.1"
+    "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "banpie-daily-chief",
       "source": "./plugins/workbuddy/banpie-daily-chief",
       "description": "本地优先的每日规划、任务管理与真实来源能力体检",
-      "version": "1.0.0-rc.1",
+      "version": "1.0.0",
       "author": {
         "name": "Banpie"
       },

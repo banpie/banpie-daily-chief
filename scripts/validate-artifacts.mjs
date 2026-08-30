@@ -22,7 +22,7 @@ const manifests = [
   JSON.parse(readFileSync(resolve("plugins/workbuddy/banpie-daily-chief/.codebuddy-plugin/plugin.json"), "utf8"))
 ];
 for (const manifest of manifests) {
-  if (manifest.name !== "banpie-daily-chief" || manifest.version !== "1.0.0-rc.1") throw new Error("Plugin manifest name/version mismatch.");
+  if (manifest.name !== "banpie-daily-chief" || manifest.version !== "1.0.0") throw new Error("Plugin manifest name/version mismatch.");
 }
 
 const installerSource = readFileSync(resolve("skills/banpie-daily-chief/scripts/install.mjs"), "utf8");
