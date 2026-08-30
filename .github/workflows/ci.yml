@@ -51,6 +51,7 @@ jobs:
         shell: bash
         run: |
           export CODEX_HOME="$RUNNER_TEMP/codex-home"
+          mkdir -p "$CODEX_HOME"
           npx --yes @openai/codex@0.151.0 plugin marketplace add "$GITHUB_WORKSPACE" --json
           npx --yes @openai/codex@0.151.0 plugin add banpie-daily-chief@banpie --json
       - run: npx --yes @tencent-ai/codebuddy-code@2.115.0 plugin validate plugins/workbuddy/banpie-daily-chief
