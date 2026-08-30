@@ -16,6 +16,10 @@
   "engines": {
     "node": ">=20"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.build.json --emitDeclarationOnly && node ../../scripts/copy-web.mjs",
     "typecheck": "tsc --noEmit"

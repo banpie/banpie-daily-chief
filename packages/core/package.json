@@ -22,6 +22,10 @@
   "engines": {
     "node": ">=20"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.build.json --emitDeclarationOnly && node scripts/generate-schemas.mjs",
     "typecheck": "tsc --noEmit"
