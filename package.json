@@ -1,6 +1,6 @@
 {
   "name": "banpie-daily-chief",
-  "version": "0.3.0-beta.1",
+  "version": "0.4.0-beta.1",
   "private": true,
   "description": "半撇每日参谋：本地优先、宿主无关的每日规划工具",
   "license": "Apache-2.0",
@@ -16,15 +16,19 @@
     "build": "node scripts/sync-plugin-skills.mjs && npm run build -w @banpie/daily-chief-core && npm run build -w @banpie/daily-chief-web && npm run build -w @banpie/daily-chief-cli",
     "dev": "npm run dev -w @banpie/daily-chief-web",
     "test": "vitest run",
+    "test:e2e": "npm run build && playwright test",
     "test:watch": "vitest",
     "typecheck": "npm run build -w @banpie/daily-chief-core && npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
-    "check": "npm run typecheck && npm run test && npm run build && npm run validate:artifacts",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run validate:artifacts",
     "validate:artifacts": "node scripts/validate-artifacts.mjs",
     "package:release": "node scripts/sync-plugin-skills.mjs && node scripts/package-release.mjs",
+    "package:runtime": "npm run build && node scripts/build-runtime.mjs",
+    "verify:installer": "node scripts/verify-installer.mjs",
     "clean": "node scripts/clean.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/archiver": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",

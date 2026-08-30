@@ -2,7 +2,7 @@
 
 一个本地优先、宿主无关的每日工作参谋。它把日历、任务、邮件行动和人工输入归一化，选出少量真正要做的事，安排不重叠的时间块，并诚实显示每个来源是否读取成功。
 
-当前版本：`0.3.0-beta.1` 公开预览版。尚未完成新 Mac、新 Windows 和 WorkBuddy/Codex 真实定时运行验收，因此不冒充 `1.0.0`。
+当前开发版本：`0.4.0-beta.1`。尚未完成新 Mac、新 Windows 和 WorkBuddy/Codex 真实定时运行验收，因此不冒充 `1.0.0`。
 
 [English](README.en.md) · [隐私说明](PRIVACY.md) · [安全政策](SECURITY.md) · [适配器开发](docs/adapter-development.md)
 
@@ -69,7 +69,7 @@ packages/cli/        固定 CLI、本地 API 和回环网页服务
 apps/web/            React 七步向导与工作台
 skills/              通用 Agent Skill
 plugins/workbuddy/   WorkBuddy 插件包
-plugins/codex/       Codex 插件包
+plugins/banpie-daily-chief/  Codex 插件包
 fixtures/            跨宿主等价夹具
 docs/                架构、安装、适配器和隐私说明
 ```

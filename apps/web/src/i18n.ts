@@ -9,3 +9,5 @@ export const copy = {
   }
 } as const;
 
+export type Language = keyof typeof copy;
+export const localize = (language: Language, chinese: string, english: string): string => language === "en" ? english : chinese;

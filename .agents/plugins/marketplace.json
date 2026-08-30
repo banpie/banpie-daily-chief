@@ -1,0 +1,20 @@
+{
+  "name": "banpie",
+  "interface": {
+    "displayName": "Banpie"
+  },
+  "plugins": [
+    {
+      "name": "banpie-daily-chief",
+      "source": {
+        "source": "local",
+        "path": "./plugins/banpie-daily-chief"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

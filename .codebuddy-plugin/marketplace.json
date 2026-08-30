@@ -1,0 +1,26 @@
+{
+  "name": "banpie",
+  "description": "半撇开源 Agent 工具市场",
+  "owner": {
+    "name": "Banpie"
+  },
+  "metadata": {
+    "version": "0.4.0-beta.1"
+  },
+  "plugins": [
+    {
+      "name": "banpie-daily-chief",
+      "source": "./plugins/workbuddy/banpie-daily-chief",
+      "description": "本地优先的每日规划、任务管理与真实来源能力体检",
+      "version": "0.4.0-beta.1",
+      "author": {
+        "name": "Banpie"
+      },
+      "homepage": "https://github.com/banpie/banpie-daily-chief",
+      "repository": "https://github.com/banpie/banpie-daily-chief",
+      "license": "Apache-2.0",
+      "keywords": ["daily-planning", "tasks", "local-first", "productivity"],
+      "category": "效率工具"
+    }
+  ]
+}

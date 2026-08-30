@@ -11,14 +11,22 @@ import {
   type SourceSnapshot
 } from "@banpie/daily-chief-core";
 
-export interface ImportFileOptions {
-  path: string;
+interface ImportBaseOptions {
   sourceId: string;
   timezone: string;
   now?: Date;
 }
 
-const makeSnapshot = (options: ImportFileOptions, capability: SourceSnapshot["capability"], items: Candidate[]): SourceSnapshot => {
+export interface ImportFileOptions extends ImportBaseOptions {
+  path: string;
+}
+
+export interface ImportContentOptions extends ImportBaseOptions {
+  filename: string;
+  content: string;
+}
+
+const makeSnapshot = (options: ImportBaseOptions, capability: SourceSnapshot["capability"], items: Candidate[]): SourceSnapshot => {
   const now = options.now ?? new Date();
   return sourceSnapshotSchema.parse({
     schema_version: API_VERSION,
@@ -34,9 +42,13 @@ const makeSnapshot = (options: ImportFileOptions, capability: SourceSnapshot["ca
 };
 
 export function importStandardFile(options: ImportFileOptions): SourceSnapshot {
-  const extension = extname(options.path).toLowerCase();
+  return importStandardContent({ ...options, filename: options.path, content: readFileSync(options.path, "utf8") });
+}
+
+export function importStandardContent(options: ImportContentOptions): SourceSnapshot {
+  const extension = extname(options.filename).toLowerCase();
   if (extension === ".json") {
-    const parsed: unknown = JSON.parse(readFileSync(options.path, "utf8"));
+    const parsed: unknown = JSON.parse(options.content);
     const snapshot = sourceSnapshotSchema.safeParse(parsed);
     if (snapshot.success) return snapshot.data;
     if (!Array.isArray(parsed)) throw snapshot.error;
@@ -44,15 +56,15 @@ export function importStandardFile(options: ImportFileOptions): SourceSnapshot {
   }
   if (extension === ".ics") return importIcs(options);
   if (extension === ".csv") {
-    const rows = parseCsv(readFileSync(options.path, "utf8"), { columns: true, skip_empty_lines: true, trim: true }) as unknown[];
+    const rows = parseCsv(options.content, { columns: true, skip_empty_lines: true, trim: true }) as unknown[];
     return makeSnapshot(options, "tasks.read", rows.map((row, index) => rowToCandidate(row, options.sourceId, index)));
   }
   if ([".md", ".markdown", ".txt"].includes(extension)) return importText(options);
   throw new Error(`Unsupported file type: ${extension || "no extension"}. Use JSON, ICS, CSV, Markdown, or TXT.`);
 }
 
-function importIcs(options: ImportFileOptions): SourceSnapshot {
-  const calendar = ical.sync.parseFile(options.path);
+function importIcs(options: ImportContentOptions): SourceSnapshot {
+  const calendar = ical.sync.parseICS(options.content);
   const items: Candidate[] = [];
   for (const component of Object.values(calendar)) {
     if (!isCalendarEvent(component) || component.status === "CANCELLED") continue;
@@ -93,8 +105,8 @@ function parameterText(value: unknown): string {
   return "";
 }
 
-function importText(options: ImportFileOptions): SourceSnapshot {
-  const lines = readFileSync(options.path, "utf8").split(/\r?\n/);
+function importText(options: ImportContentOptions): SourceSnapshot {
+  const lines = options.content.split(/\r?\n/);
   const items = lines.flatMap((line, index) => {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) return [];

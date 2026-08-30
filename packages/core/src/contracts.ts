@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const API_VERSION = "1.0" as const;
-export const CORE_VERSION = "0.3.0-beta.1" as const;
+export const CORE_VERSION = "0.4.0-beta.1" as const;
 
 export const capabilitySchema = z.enum([
   "calendar.read",
@@ -35,6 +35,7 @@ export const taskStatusSchema = z.enum([
 export const projectStatusSchema = z.enum(["active", "paused", "done", "canceled"]);
 export const candidateKindSchema = z.enum(["event", "task", "mail", "signal"]);
 export const prioritySchema = z.enum(["p0", "p1", "p2", "p3"]);
+export const deviceEcosystemSchema = z.enum(["iphone_mac", "iphone_no_mac", "android_google", "other"]);
 
 const optionalIso = z.iso.datetime({ offset: true }).optional();
 
@@ -94,6 +95,7 @@ export const taskSchema = z.object({
   estimate_minutes: z.number().int().min(5).max(720).default(30),
   priority: prioritySchema.default("p2"),
   recurrence_rrule: z.string().optional(),
+  recurrence_start_date: z.iso.date().optional(),
   context: z.string().max(120).optional(),
   next_action: z.string().max(500).optional(),
   created_at: z.iso.datetime({ offset: true }),
@@ -162,6 +164,38 @@ export const dailyBriefSchema = z.object({
   degraded: z.boolean().default(false)
 });
 
+export const dailyPlanSchema = z.object({
+  schema_version: z.literal(API_VERSION),
+  plan_id: z.string().min(1),
+  date: z.iso.date(),
+  brief_id: z.string().min(1),
+  accepted: z.boolean().default(false),
+  adjusted: z.boolean().default(false),
+  action_order: z.array(z.string().min(1)).max(5),
+  time_blocks: z.array(timeBlockSchema),
+  created_at: z.iso.datetime({ offset: true }),
+  updated_at: z.iso.datetime({ offset: true })
+});
+
+export const onboardingDraftTaskSchema = z.object({
+  draft_id: z.string().min(1),
+  title: z.string().trim().min(1).max(300),
+  estimate_minutes: z.number().int().min(5).max(720).default(30),
+  priority: prioritySchema.default("p2")
+});
+
+export const onboardingStateSchema = z.object({
+  schema_version: z.literal(API_VERSION),
+  current_step: z.number().int().min(1).max(7).default(1),
+  device_ecosystem: deviceEcosystemSchema.default("other"),
+  selected_sources: z.array(z.string().min(1)).default(["local.tasks"]),
+  draft_tasks: z.array(onboardingDraftTaskSchema).max(10).default([]),
+  seed_task_ids: z.array(z.string().min(1)).max(10).default([]),
+  preview_brief_id: z.string().optional(),
+  completed_at: optionalIso,
+  updated_at: z.iso.datetime({ offset: true })
+});
+
 export const adapterReportSchema = z.object({
   adapter_id: z.string().min(1),
   api_version: z.literal(API_VERSION),
@@ -221,7 +255,14 @@ export type SourceSnapshot = z.infer<typeof sourceSnapshotSchema>;
 export type Task = z.infer<typeof taskSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type DailyBrief = z.infer<typeof dailyBriefSchema>;
+export type DailyPlan = z.infer<typeof dailyPlanSchema>;
+export type OnboardingState = z.infer<typeof onboardingStateSchema>;
 export type CapabilityReport = z.infer<typeof capabilityReportSchema>;
 export type Settings = z.infer<typeof settingsSchema>;
 
 export const defaultSettings: Settings = settingsSchema.parse({});
+
+export const defaultOnboardingState: OnboardingState = onboardingStateSchema.parse({
+  schema_version: API_VERSION,
+  updated_at: new Date(0).toISOString()
+});

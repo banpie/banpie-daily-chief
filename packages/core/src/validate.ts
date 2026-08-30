@@ -1,5 +1,5 @@
 import { isBefore, parseISO } from "date-fns";
-import { dailyBriefSchema, type DailyBrief, type SourceSnapshot } from "./contracts.js";
+import { dailyBriefSchema, dailyPlanSchema, type DailyBrief, type DailyPlan, type SourceSnapshot } from "./contracts.js";
 
 export interface ValidationIssue {
   code: string;
@@ -13,7 +13,7 @@ export interface ValidationResult {
   issues: ValidationIssue[];
 }
 
-export function validateDailyBrief(input: unknown, snapshots: SourceSnapshot[] = [], now = new Date()): ValidationResult {
+export function validateDailyBrief(input: unknown, snapshots: SourceSnapshot[] = [], _now = new Date()): ValidationResult {
   const parsed = dailyBriefSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -85,4 +85,48 @@ export function assertValidDailyBrief(input: unknown, snapshots: SourceSnapshot[
   const result = validateDailyBrief(input, snapshots, now);
   if (!result.valid) throw new Error(result.issues.map((issue) => `[${issue.code}] ${issue.message}`).join("\n"));
   return dailyBriefSchema.parse(input);
+}
+
+export function validateDailyPlan(input: unknown, brief: DailyBrief, now = new Date()): ValidationResult {
+  const parsed = dailyPlanSchema.safeParse(input);
+  if (!parsed.success) {
+    return { valid: false, issues: parsed.error.issues.map((issue) => ({ code: "schema_invalid", message: issue.message, path: issue.path.join("."), severity: "error" })) };
+  }
+  const plan = parsed.data;
+  const issues: ValidationIssue[] = [];
+  if (plan.brief_id !== brief.brief_id || plan.date !== brief.date) {
+    issues.push({ code: "brief_mismatch", message: "日计划与当前简报不匹配。", severity: "error" });
+  }
+  const expectedActions = new Set(brief.actions.map((action) => action.action_id));
+  if (plan.action_order.length !== expectedActions.size || new Set(plan.action_order).size !== plan.action_order.length || plan.action_order.some((id) => !expectedActions.has(id))) {
+    issues.push({ code: "action_order_invalid", message: "日计划必须且只能排列当前简报中的行动。", path: "action_order", severity: "error" });
+  }
+  const originalFixed = new Map(brief.time_blocks.filter((block) => block.kind === "fixed").map((block) => [block.block_id, block]));
+  for (const [id, block] of originalFixed) {
+    const current = plan.time_blocks.find((item) => item.block_id === id);
+    if (!current || current.start_at !== block.start_at || current.end_at !== block.end_at || current.title !== block.title) {
+      issues.push({ code: "fixed_block_changed", message: `固定事件“${block.title}”不可在本地日计划中改写。`, severity: "error" });
+    }
+  }
+  const todayParts = new Intl.DateTimeFormat("en-CA", { timeZone: brief.timezone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
+  const todayValues = Object.fromEntries(todayParts.map((part) => [part.type, part.value]));
+  const currentDate = `${todayValues.year}-${todayValues.month}-${todayValues.day}`;
+  const sorted = [...plan.time_blocks].sort((left, right) => parseISO(left.start_at).getTime() - parseISO(right.start_at).getTime());
+  sorted.forEach((block, index) => {
+    const start = parseISO(block.start_at);
+    const end = parseISO(block.end_at);
+    if (!isBefore(start, end)) issues.push({ code: "invalid_block", message: `时间块“${block.title}”结束时间不晚于开始时间。`, severity: "error" });
+    if (block.editable && isBefore(start, now) && brief.date === currentDate) {
+      issues.push({ code: "past_block", message: `时间块“${block.title}”不能移动到过去。`, severity: "error" });
+    }
+    const next = sorted[index + 1];
+    if (next && isBefore(parseISO(next.start_at), end) && !(block.kind === "fixed" && next.kind === "fixed")) {
+      issues.push({ code: "overlap", message: `时间块“${block.title}”与“${next.title}”重叠。`, severity: "error" });
+    }
+  });
+  const minutes = (blocks: DailyPlan["time_blocks"], kind: "buffer") => blocks.filter((block) => block.kind === kind).reduce((total, block) => total + (parseISO(block.end_at).getTime() - parseISO(block.start_at).getTime()) / 60000, 0);
+  if (minutes(plan.time_blocks, "buffer") < minutes(brief.time_blocks, "buffer")) {
+    issues.push({ code: "buffer_reduced", message: "人工调整不能减少系统预留的缓冲时间。", severity: "error" });
+  }
+  return { valid: issues.every((issue) => issue.severity !== "error"), issues };
 }

@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "current_step": {
+      "default": 1,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7
+    },
+    "device_ecosystem": {
+      "default": "other",
+      "type": "string",
+      "enum": [
+        "iphone_mac",
+        "iphone_no_mac",
+        "android_google",
+        "other"
+      ]
+    },
+    "selected_sources": {
+      "default": [
+        "local.tasks"
+      ],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "draft_tasks": {
+      "default": [],
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "estimate_minutes": {
+            "default": 30,
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 720
+          },
+          "priority": {
+            "default": "p2",
+            "type": "string",
+            "enum": [
+              "p0",
+              "p1",
+              "p2",
+              "p3"
+            ]
+          }
+        },
+        "required": [
+          "draft_id",
+          "title",
+          "estimate_minutes",
+          "priority"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "seed_task_ids": {
+      "default": [],
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "preview_brief_id": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "current_step",
+    "device_ecosystem",
+    "selected_sources",
+    "draft_tasks",
+    "seed_task_ids",
+    "updated_at"
+  ],
+  "additionalProperties": false,
+  "$id": "https://schemas.banpie.info/daily-chief/v1/OnboardingState.schema.json"
+}

@@ -6,8 +6,11 @@ import {
   renderDailyBriefMarkdown,
   sourceSnapshotSchema,
   taskToCandidate,
+  taskCandidateForDate,
+  taskOccursOn,
   validateDailyBrief,
   type DailyBrief,
+  type DailyPlan,
   type SourceSnapshot
 } from "@banpie/daily-chief-core";
 
@@ -15,12 +18,16 @@ export function dateInTimezone(timezone: string, now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 }
 
-export function generateFromDatabase(db: DailyChiefDatabase, date?: string, now = new Date()): { brief: DailyBrief; snapshots: SourceSnapshot[] } {
+export function generateFromDatabase(db: DailyChiefDatabase, date?: string, now = new Date()): { brief: DailyBrief; plan: DailyPlan; snapshots: SourceSnapshot[] } {
   const started = Date.now();
   const startedAt = now.toISOString();
   const settings = db.getSettings();
   const briefDate = date ?? dateInTimezone(settings.timezone, now);
-  const tasks = db.listTasks().filter((task) => !["done", "canceled"].includes(task.status));
+  const tasks = db.listTasks().filter((task) => {
+    if (task.status === "canceled" || task.status === "done") return false;
+    if (!task.recurrence_rrule) return true;
+    return taskOccursOn(task, briefDate, settings.timezone) && !db.isTaskOccurrenceCompleted(task.task_id, briefDate);
+  });
   const localSnapshot = sourceSnapshotSchema.parse({
     schema_version: API_VERSION,
     snapshot_id: `local:${randomUUID()}`,
@@ -30,7 +37,7 @@ export function generateFromDatabase(db: DailyChiefDatabase, date?: string, now 
     timezone: settings.timezone,
     status: "ok",
     expires_at: new Date(now.getTime() + 5 * 60_000).toISOString(),
-    items: tasks.map(taskToCandidate)
+    items: tasks.map((task) => task.recurrence_rrule ? taskCandidateForDate(task, briefDate) : taskToCandidate(task))
   });
   const snapshots = [...db.latestSnapshots(now).filter((snapshot) => snapshot.source_id !== "local.tasks"), localSnapshot];
 
@@ -39,6 +46,7 @@ export function generateFromDatabase(db: DailyChiefDatabase, date?: string, now 
     const validation = validateDailyBrief(brief, snapshots, now);
     if (!validation.valid) throw new Error(validation.issues.map((issue) => `[${issue.code}] ${issue.message}`).join("\n"));
     db.saveBrief(brief);
+    const plan = db.createPlanFromBrief(brief);
     db.saveRunLog({
       started_at: startedAt,
       finished_at: new Date().toISOString(),
@@ -47,7 +55,7 @@ export function generateFromDatabase(db: DailyChiefDatabase, date?: string, now 
       missing_sources: brief.source_status.filter((source) => source.status !== "ok").map((source) => source.source_id),
       brief_id: brief.brief_id
     });
-    return { brief, snapshots };
+    return { brief, plan, snapshots };
   } catch (caught) {
     db.saveRunLog({
       started_at: startedAt,
@@ -64,4 +72,3 @@ export function generateFromDatabase(db: DailyChiefDatabase, date?: string, now 
 export function formatBrief(brief: DailyBrief, format: "json" | "markdown", language: "zh-CN" | "en"): string {
   return format === "json" ? `${JSON.stringify(brief, null, 2)}\n` : renderDailyBriefMarkdown(brief, language);
 }
-

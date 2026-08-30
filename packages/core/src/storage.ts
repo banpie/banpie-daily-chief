@@ -4,13 +4,19 @@ import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import type DatabaseType from "better-sqlite3";
 import {
+  API_VERSION,
   dailyBriefSchema,
+  dailyPlanSchema,
+  defaultOnboardingState,
   defaultSettings,
+  onboardingStateSchema,
   projectSchema,
   settingsSchema,
   sourceSnapshotSchema,
   taskSchema,
   type DailyBrief,
+  type DailyPlan,
+  type OnboardingState,
   type Project,
   type Settings,
   type SourceSnapshot,
@@ -29,6 +35,14 @@ interface RunLog {
 }
 
 type NewTask = Partial<Omit<Task, "task_id" | "created_at" | "updated_at">> & Pick<Task, "title">;
+type TaskUpdate = Partial<Omit<Task, "task_id" | "created_at" | "due_at" | "plan_date" | "recurrence_rrule" | "recurrence_start_date" | "context" | "next_action">> & {
+  due_at?: string | null;
+  plan_date?: string | null;
+  recurrence_rrule?: string | null;
+  recurrence_start_date?: string | null;
+  context?: string | null;
+  next_action?: string | null;
+};
 type NewProject = Partial<Omit<Project, "project_id" | "created_at" | "updated_at">> & Pick<Project, "title">;
 
 const require = createRequire(import.meta.url);
@@ -126,7 +140,27 @@ export class DailyChiefDatabase {
         payload TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS onboarding_state (
+        state_id TEXT PRIMARY KEY,
+        payload TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS daily_plans (
+        plan_id TEXT PRIMARY KEY,
+        plan_date TEXT NOT NULL UNIQUE,
+        brief_id TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        payload TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_daily_plans_date ON daily_plans(plan_date, updated_at DESC);
+      CREATE TABLE IF NOT EXISTS task_occurrence_completions (
+        task_id TEXT NOT NULL,
+        occurrence_date TEXT NOT NULL,
+        completed_at TEXT NOT NULL,
+        PRIMARY KEY(task_id, occurrence_date)
+      );
       INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES (1, datetime('now'));
+      INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES (2, datetime('now'));
     `);
   }
 
@@ -143,6 +177,22 @@ export class DailyChiefDatabase {
       ON CONFLICT(settings_id) DO UPDATE SET payload = excluded.payload, updated_at = excluded.updated_at
     `).run(JSON.stringify(settings), new Date().toISOString());
     return settings;
+  }
+
+  getOnboardingState(): OnboardingState {
+    const row = this.db.prepare("SELECT payload FROM onboarding_state WHERE state_id = 'default'").get() as { payload: string } | undefined;
+    if (!row) return { ...defaultOnboardingState, updated_at: new Date().toISOString() };
+    return onboardingStateSchema.parse(JSON.parse(row.payload));
+  }
+
+  saveOnboardingState(input: Partial<OnboardingState>): OnboardingState {
+    const current = this.getOnboardingState();
+    const state = onboardingStateSchema.parse({ ...current, ...input, schema_version: API_VERSION, updated_at: new Date().toISOString() });
+    this.db.prepare(`
+      INSERT INTO onboarding_state(state_id, payload, updated_at) VALUES ('default', ?, ?)
+      ON CONFLICT(state_id) DO UPDATE SET payload = excluded.payload, updated_at = excluded.updated_at
+    `).run(JSON.stringify(state), state.updated_at);
+    return state;
   }
 
   listTasks(options: { status?: Task["status"]; project_id?: string } = {}): Task[] {
@@ -180,6 +230,7 @@ export class DailyChiefDatabase {
       ...(input.due_at ? { due_at: input.due_at } : {}),
       ...(input.plan_date ? { plan_date: input.plan_date } : {}),
       ...(input.recurrence_rrule ? { recurrence_rrule: input.recurrence_rrule } : {}),
+      ...(input.recurrence_start_date ? { recurrence_start_date: input.recurrence_start_date } : {}),
       ...(input.context ? { context: input.context } : {}),
       ...(input.next_action ? { next_action: input.next_action } : {})
     });
@@ -187,20 +238,53 @@ export class DailyChiefDatabase {
     return task;
   }
 
-  updateTask(taskId: string, input: Partial<Omit<Task, "task_id" | "created_at">>): Task {
+  updateTask(taskId: string, input: TaskUpdate): Task {
     const existing = this.getTask(taskId);
     if (!existing) throw new Error(`Task not found: ${taskId}`);
-    const completedAt = input.status === "done" && !existing.completed_at ? new Date().toISOString() : input.completed_at ?? existing.completed_at;
-    const task = taskSchema.parse({
+    const nextStatus = input.status ?? existing.status;
+    const completedAt = nextStatus === "done"
+      ? (input.completed_at ?? existing.completed_at ?? new Date().toISOString())
+      : undefined;
+    const merged: Record<string, unknown> = {
       ...existing,
       ...input,
       task_id: existing.task_id,
       created_at: existing.created_at,
       updated_at: new Date().toISOString(),
-      ...(completedAt ? { completed_at: completedAt } : {})
-    });
+      completed_at: completedAt
+    };
+    for (const key of ["due_at", "plan_date", "recurrence_rrule", "recurrence_start_date", "context", "next_action"] as const) {
+      if (input[key] === null || input[key] === "") delete merged[key];
+    }
+    const task = taskSchema.parse(merged);
     this.saveTask(task);
     return task;
+  }
+
+  completeTask(taskId: string, occurrenceDate?: string): Task {
+    const task = this.getTask(taskId);
+    if (!task) throw new Error(`Task not found: ${taskId}`);
+    if (!task.recurrence_rrule) return this.updateTask(taskId, { status: "done" });
+    if (!occurrenceDate) throw new Error("occurrence_date is required for a recurring task");
+    this.db.prepare(`
+      INSERT INTO task_occurrence_completions(task_id, occurrence_date, completed_at) VALUES (?, ?, ?)
+      ON CONFLICT(task_id, occurrence_date) DO UPDATE SET completed_at = excluded.completed_at
+    `).run(taskId, occurrenceDate, new Date().toISOString());
+    return task;
+  }
+
+  reopenTaskOccurrence(taskId: string, occurrenceDate: string): Task {
+    const task = this.getTask(taskId);
+    if (!task) throw new Error(`Task not found: ${taskId}`);
+    if (task.recurrence_rrule) {
+      this.db.prepare("DELETE FROM task_occurrence_completions WHERE task_id = ? AND occurrence_date = ?").run(taskId, occurrenceDate);
+      return task;
+    }
+    return this.updateTask(taskId, { status: "next", completed_at: undefined });
+  }
+
+  isTaskOccurrenceCompleted(taskId: string, occurrenceDate: string): boolean {
+    return Boolean(this.db.prepare("SELECT 1 AS found FROM task_occurrence_completions WHERE task_id = ? AND occurrence_date = ?").get(taskId, occurrenceDate));
   }
 
   private saveTask(task: Task): void {
@@ -299,6 +383,48 @@ export class DailyChiefDatabase {
   listBriefs(limit = 30): DailyBrief[] {
     return (this.db.prepare("SELECT payload FROM daily_briefs ORDER BY generated_at DESC LIMIT ?").all(limit) as Array<{ payload: string }>)
       .map((row) => dailyBriefSchema.parse(JSON.parse(row.payload)));
+  }
+
+  createPlanFromBrief(brief: DailyBrief): DailyPlan {
+    const existing = this.getDailyPlan(brief.date);
+    const now = new Date().toISOString();
+    const fixedSignature = (blocks: DailyPlan["time_blocks"]) => JSON.stringify(blocks
+      .filter((block) => block.kind === "fixed")
+      .map(({ title, start_at, end_at, editable }) => ({ title, start_at, end_at, editable }))
+      .sort((left, right) => `${left.start_at}\u0000${left.end_at}\u0000${left.title}`.localeCompare(`${right.start_at}\u0000${right.end_at}\u0000${right.title}`)));
+    const compatible = Boolean(existing)
+      && [...existing!.action_order].sort().join("\u0000") === brief.actions.map((action) => action.action_id).sort().join("\u0000")
+      && fixedSignature(existing!.time_blocks) === fixedSignature(brief.time_blocks);
+    if (existing?.adjusted && compatible) {
+      return this.saveDailyPlan({ ...existing, brief_id: brief.brief_id });
+    }
+    return this.saveDailyPlan(dailyPlanSchema.parse({
+      schema_version: API_VERSION,
+      plan_id: existing?.plan_id ?? randomUUID(),
+      date: brief.date,
+      brief_id: brief.brief_id,
+      accepted: compatible ? existing?.accepted ?? false : false,
+      adjusted: false,
+      action_order: brief.actions.map((action) => action.action_id),
+      time_blocks: brief.time_blocks,
+      created_at: existing?.created_at ?? now,
+      updated_at: now
+    }));
+  }
+
+  getDailyPlan(date: string): DailyPlan | undefined {
+    const row = this.db.prepare("SELECT payload FROM daily_plans WHERE plan_date = ?").get(date) as { payload: string } | undefined;
+    return row ? dailyPlanSchema.parse(JSON.parse(row.payload)) : undefined;
+  }
+
+  saveDailyPlan(input: DailyPlan): DailyPlan {
+    const plan = dailyPlanSchema.parse({ ...input, updated_at: new Date().toISOString() });
+    this.db.prepare(`
+      INSERT INTO daily_plans(plan_id, plan_date, brief_id, updated_at, payload) VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(plan_date) DO UPDATE SET plan_id = excluded.plan_id, brief_id = excluded.brief_id,
+        updated_at = excluded.updated_at, payload = excluded.payload
+    `).run(plan.plan_id, plan.date, plan.brief_id, plan.updated_at, JSON.stringify(plan));
+    return plan;
   }
 
   saveRunLog(input: Omit<RunLog, "run_id"> & { run_id?: string }): RunLog {

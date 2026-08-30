@@ -4,10 +4,12 @@ import { resolve } from "node:path";
 const required = [
   "skills/banpie-daily-chief/SKILL.md",
   "skills/banpie-daily-chief/agents/openai.yaml",
-  "plugins/codex/banpie-daily-chief/.codex-plugin/plugin.json",
+  "plugins/banpie-daily-chief/.codex-plugin/plugin.json",
   "plugins/workbuddy/banpie-daily-chief/.codebuddy-plugin/plugin.json",
   "packages/core/schemas/v1/SourceSnapshot.schema.json",
   "packages/core/schemas/v1/DailyBrief.schema.json",
+  "packages/core/schemas/v1/DailyPlan.schema.json",
+  "packages/core/schemas/v1/OnboardingState.schema.json",
   "packages/cli/dist/index.js",
   "packages/cli/public/index.html"
 ];
@@ -16,11 +18,11 @@ for (const path of required) {
 }
 
 const manifests = [
-  JSON.parse(readFileSync(resolve("plugins/codex/banpie-daily-chief/.codex-plugin/plugin.json"), "utf8")),
+  JSON.parse(readFileSync(resolve("plugins/banpie-daily-chief/.codex-plugin/plugin.json"), "utf8")),
   JSON.parse(readFileSync(resolve("plugins/workbuddy/banpie-daily-chief/.codebuddy-plugin/plugin.json"), "utf8"))
 ];
 for (const manifest of manifests) {
-  if (manifest.name !== "banpie-daily-chief" || manifest.version !== "0.3.0-beta.1") throw new Error("Plugin manifest name/version mismatch.");
+  if (manifest.name !== "banpie-daily-chief" || manifest.version !== "0.4.0-beta.1") throw new Error("Plugin manifest name/version mismatch.");
 }
 
 function walk(directory) {

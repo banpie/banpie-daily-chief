@@ -5,7 +5,7 @@ const sourceSkill = resolve("skills/banpie-daily-chief");
 const sourceBridge = resolve("scripts/bridge.mjs");
 const sourceInstaller = resolve("skills/banpie-daily-chief/scripts/install.mjs");
 const targets = [
-  resolve("plugins/codex/banpie-daily-chief"),
+  resolve("plugins/banpie-daily-chief"),
   resolve("plugins/workbuddy/banpie-daily-chief")
 ];
 

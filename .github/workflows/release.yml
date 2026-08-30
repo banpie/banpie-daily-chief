@@ -9,7 +9,7 @@ permissions:
   id-token: write
 
 jobs:
-  release:
+  validation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -19,7 +19,64 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
-      - run: node scripts/sync-plugin-skills.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: 验证 Codex 市场安装
+        shell: bash
+        run: |
+          export CODEX_HOME="$RUNNER_TEMP/codex-home"
+          npx --yes @openai/codex@0.151.0 plugin marketplace add "$GITHUB_WORKSPACE" --json
+          npx --yes @openai/codex@0.151.0 plugin add banpie-daily-chief@banpie --json
+      - run: npx --yes @tencent-ai/codebuddy-code@2.115.0 plugin validate plugins/workbuddy/banpie-daily-chief
+      - run: npx --yes @tencent-ai/codebuddy-code@2.115.0 plugin validate .codebuddy-plugin/marketplace.json
+
+  runtime:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            node: 22
+            label: macos-arm64
+          - os: macos-13
+            node: 22
+            label: macos-x64
+          - os: windows-latest
+            node: 22
+            label: windows-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/build-runtime.mjs
+      - run: npm run verify:installer
+      - uses: actions/upload-artifact@v6
+        with:
+          name: runtime-${{ matrix.label }}
+          path: release/banpie-daily-chief-runtime-*.zip
+          if-no-files-found: error
+
+  release:
+    needs: [validation, runtime]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: runtime-*
+          path: release
+          merge-multiple: true
       - run: npm run package:release
       - uses: softprops/action-gh-release@v2
         with:

@@ -2,7 +2,7 @@
 
 A local-first, host-agnostic daily planning assistant. It normalizes calendars, tasks, actionable mail and manual input, selects a small number of realistic actions, creates non-overlapping time blocks, and reports source failures honestly.
 
-Current release: `0.3.0-beta.1` public preview. It is not labeled `1.0.0` until fresh macOS/Windows installs and real scheduled runs in WorkBuddy and Codex have passed.
+Current development release: `0.4.0-beta.1`. It is not labeled `1.0.0` until fresh macOS/Windows installs and real scheduled runs in WorkBuddy and Codex have passed.
 
 ## Agent-first installation
 
@@ -12,7 +12,7 @@ Paste this into an agent that can run local commands:
 
 No task app, API key, task OS, mail plugin, or cloud account is required. The built-in inbox and task database are enough for a complete first plan.
 
-Download the generic Skill, WorkBuddy package, or Codex package from [GitHub Releases](https://github.com/banpie/banpie-daily-chief/releases). The included installer builds the pinned release in the local application-data directory; the user does not need to open a terminal.
+Download the generic Skill, WorkBuddy package, or Codex package from [GitHub Releases](https://github.com/banpie/banpie-daily-chief/releases). The included installer downloads a platform-specific, SHA-256-verified runtime into the local application-data directory; it does not build the project on the user's machine and the user does not need to open a terminal.
 
 ## Key properties
 

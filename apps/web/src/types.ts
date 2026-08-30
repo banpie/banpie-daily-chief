@@ -1,4 +1,4 @@
-import type { DailyBrief, Project, Settings, SourceSnapshot, Task } from "@banpie/daily-chief-core";
+import type { CapabilityReport, DailyBrief, DailyPlan, OnboardingState, Project, Settings, SourceSnapshot, Task } from "@banpie/daily-chief-core";
 
 export interface RunLog {
   run_id: string;
@@ -14,11 +14,15 @@ export interface RunLog {
 export interface BootstrapData {
   settings: Settings;
   tasks: Task[];
+  recurring_occurrences_today: string[];
+  completed_occurrences_today: string[];
   projects: Project[];
   snapshots: SourceSnapshot[];
   brief: DailyBrief | null;
+  plan: DailyPlan | null;
+  onboarding: OnboardingState;
+  doctor: CapabilityReport;
   runs: RunLog[];
 }
 
-export type { DailyBrief, Project, Settings, SourceSnapshot, Task };
-
+export type { CapabilityReport, DailyBrief, DailyPlan, OnboardingState, Project, Settings, SourceSnapshot, Task };

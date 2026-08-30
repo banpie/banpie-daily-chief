@@ -3,64 +3,18 @@
   "type": "object",
   "properties": {
     "schema_version": {
-      "$ref": "#/$defs/__schema0"
-    },
-    "snapshot_id": {
-      "$ref": "#/$defs/__schema1"
-    },
-    "source_id": {
-      "$ref": "#/$defs/__schema2"
-    },
-    "capability": {
-      "$ref": "#/$defs/__schema3"
-    },
-    "captured_at": {
-      "$ref": "#/$defs/__schema4"
-    },
-    "timezone": {
-      "$ref": "#/$defs/__schema5"
-    },
-    "status": {
-      "$ref": "#/$defs/__schema6"
-    },
-    "expires_at": {
-      "$ref": "#/$defs/__schema7"
-    },
-    "failure_reason": {
-      "$ref": "#/$defs/__schema8"
-    },
-    "recovery_hint": {
-      "$ref": "#/$defs/__schema9"
-    },
-    "items": {
-      "$ref": "#/$defs/__schema10"
-    }
-  },
-  "required": [
-    "schema_version",
-    "snapshot_id",
-    "source_id",
-    "capability",
-    "captured_at",
-    "timezone",
-    "status",
-    "items"
-  ],
-  "additionalProperties": false,
-  "$defs": {
-    "__schema0": {
       "type": "string",
       "const": "1.0"
     },
-    "__schema1": {
+    "snapshot_id": {
       "type": "string",
       "minLength": 1
     },
-    "__schema2": {
+    "source_id": {
       "type": "string",
       "minLength": 1
     },
-    "__schema3": {
+    "capability": {
       "type": "string",
       "enum": [
         "calendar.read",
@@ -73,16 +27,16 @@
         "local.tasks.write"
       ]
     },
-    "__schema4": {
+    "captured_at": {
       "type": "string",
       "format": "date-time",
       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
     },
-    "__schema5": {
+    "timezone": {
       "type": "string",
       "minLength": 1
     },
-    "__schema6": {
+    "status": {
       "type": "string",
       "enum": [
         "ok",
@@ -93,20 +47,20 @@
         "not_read"
       ]
     },
-    "__schema7": {
+    "expires_at": {
       "type": "string",
       "format": "date-time",
       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
     },
-    "__schema8": {
+    "failure_reason": {
       "type": "string",
       "maxLength": 1000
     },
-    "__schema9": {
+    "recovery_hint": {
       "type": "string",
       "maxLength": 1000
     },
-    "__schema10": {
+    "items": {
       "default": [],
       "type": "array",
       "items": {
@@ -145,13 +99,19 @@
             "format": "uri"
           },
           "start_at": {
-            "$ref": "#/$defs/__schema7"
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           },
           "end_at": {
-            "$ref": "#/$defs/__schema7"
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           },
           "due_at": {
-            "$ref": "#/$defs/__schema7"
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           },
           "plan_date": {
             "type": "string",
@@ -226,5 +186,16 @@
       }
     }
   },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "source_id",
+    "capability",
+    "captured_at",
+    "timezone",
+    "status",
+    "items"
+  ],
+  "additionalProperties": false,
   "$id": "https://schemas.banpie.info/daily-chief/v1/SourceSnapshot.schema.json"
 }

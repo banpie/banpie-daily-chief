@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
-import { importStandardFile } from "./import-file.js";
+import { importStandardContent, importStandardFile } from "./import-file.js";
 
 const directories: string[] = [];
 afterEach(() => { while (directories.length) rmSync(directories.pop()!, { recursive: true, force: true }); });
@@ -32,5 +32,9 @@ describe("standard file import", () => {
     expect(result.capability).toBe("calendar.read");
     expect(result.items[0]).toMatchObject({ title: "固定会议", kind: "event" });
   });
-});
 
+  it("imports browser-provided content without persisting a temporary original", () => {
+    const result = importStandardContent({ ...base, filename: "tasks.csv", content: "title,status\n网页导入,next\n" });
+    expect(result.items[0]).toMatchObject({ title: "网页导入", status: "next" });
+  });
+});

@@ -12,14 +12,15 @@ import { defaultDatabasePath } from "./paths.js";
 import { startServer } from "./server.js";
 
 const program = new Command();
-program.name("daily-chief").description("半撇每日参谋本地 CLI").version("0.3.0-beta.1");
+program.name("daily-chief").description("半撇每日参谋本地 CLI").version("0.4.0-beta.1");
 program.option("--database <path>", "SQLite database path", defaultDatabasePath());
 
 program.command("doctor")
   .description("探测当前宿主、系统和可用能力")
   .option("--json", "output JSON")
-  .action((options: { json?: boolean }) => {
-    const report = runDoctor(program.opts<{ database: string }>().database);
+  .option("--host-report <path>", "validated host capability report")
+  .action((options: { json?: boolean; hostReport?: string }) => {
+    const report = runDoctor(program.opts<{ database: string }>().database, options.hostReport);
     process.stdout.write(options.json ? `${JSON.stringify(report, null, 2)}\n` : `Host: ${report.agent_host}\nOS: ${report.operating_system}\nDatabase: ${report.local_database.available ? "OK" : "FAILED"}\n`);
   });
 
@@ -67,12 +68,15 @@ program.command("validate")
 program.command("serve")
   .description("启动仅监听本机回环地址的网页工作台")
   .option("--port <port>", "local port", (value) => Number.parseInt(value, 10), 3210)
+  .option("--host-report <path>", "validated host capability report")
   .option("--no-open", "do not open a browser")
-  .action(async (options: { port: number; open: boolean }) => {
+  .action(async (options: { port: number; open: boolean; hostReport?: string }) => {
     const result = await startServer({
       port: options.port,
       openBrowser: options.open,
-      databasePath: program.opts<{ database: string }>().database
+      databasePath: program.opts<{ database: string }>().database,
+      ...(process.env.DAILY_CHIEF_LOCAL_TOKEN ? { token: process.env.DAILY_CHIEF_LOCAL_TOKEN } : {}),
+      ...(options.hostReport ? { hostReportPath: options.hostReport } : {})
     });
     process.stdout.write(`半撇每日参谋已启动：${result.url}\n`);
   });

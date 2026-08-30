@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "language": {
+      "default": "zh-CN",
+      "type": "string",
+      "enum": [
+        "zh-CN",
+        "en"
+      ]
+    },
+    "timezone": {
+      "default": "Asia/Shanghai",
+      "type": "string"
+    },
+    "wake_time": {
+      "default": "07:00",
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$"
+    },
+    "sleep_time": {
+      "default": "23:00",
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$"
+    },
+    "work_start": {
+      "default": "09:00",
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$"
+    },
+    "work_end": {
+      "default": "18:00",
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$"
+    },
+    "lunch_start": {
+      "default": "12:00",
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$"
+    },
+    "lunch_end": {
+      "default": "13:30",
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$"
+    },
+    "primary_actions": {
+      "default": 3,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "max_actions": {
+      "default": 5,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "deep_block_minutes": {
+      "default": 90,
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 180
+    },
+    "focus_block_minutes": {
+      "default": 60,
+      "type": "integer",
+      "minimum": 20,
+      "maximum": 120
+    },
+    "admin_block_minutes": {
+      "default": 30,
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 60
+    },
+    "buffer_ratio": {
+      "default": 0.2,
+      "type": "number",
+      "minimum": 0.1,
+      "maximum": 0.5
+    },
+    "snapshot_retention_days": {
+      "default": 7,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 90
+    },
+    "brief_retention_days": {
+      "default": 90,
+      "type": "integer",
+      "minimum": 7,
+      "maximum": 3650
+    },
+    "onboarding_completed": {
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "language",
+    "timezone",
+    "wake_time",
+    "sleep_time",
+    "work_start",
+    "work_end",
+    "lunch_start",
+    "lunch_end",
+    "primary_actions",
+    "max_actions",
+    "deep_block_minutes",
+    "focus_block_minutes",
+    "admin_block_minutes",
+    "buffer_ratio",
+    "snapshot_retention_days",
+    "brief_retention_days",
+    "onboarding_completed"
+  ],
+  "additionalProperties": false,
+  "$id": "https://schemas.banpie.info/daily-chief/v1/Settings.schema.json"
+}

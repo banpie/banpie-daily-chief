@@ -13,10 +13,10 @@ description: 为普通用户安装、体检和运行“半撇每日参谋”；�
 
 用户要求安装时：
 
-1. 先确认 Node.js 20+ 可用。若 `daily-chief` 尚不存在，优先运行本 Skill 的 `scripts/install.mjs` 安装固定版本；不要要求用户自己打开终端。
-2. 运行 `daily-chief doctor --json`；插件包也可以用 `node scripts/bridge.mjs doctor --json`。
+1. 若 `daily-chief` 尚不存在，优先由 Agent 运行本 Skill 的 `scripts/install.mjs`。安装器下载当前系统的预构建运行时并校验 SHA-256；不要让普通用户打开终端，也不要在用户机器上执行完整源码构建。
+2. 先根据当前会话真实可见的工具生成不含凭证的 `CapabilityReport` 临时文件，再运行 `daily-chief doctor --json --host-report <path>`；插件包也可以用 `node scripts/bridge.mjs doctor --json --host-report <path>`。没有真实报告时必须显示“当前宿主未知”，不能用浏览器字段或配置目录猜测。
 3. 只做体检，不登录、不连接、不修改任何外部数据。
-4. 启动 `daily-chief serve`，让用户在七步向导中设置语言、时区、作息和真实任务。
+4. 用同一报告启动 `daily-chief serve --host-report <path>`，让用户在七步向导中设置语言、时区、作息和真实任务。
 5. 使用内置任务库生成第一份预览；解释每项入选和延期原因。
 6. 预览通过后，才询问是否使用当前宿主创建每日运行。宿主没有调度能力时保留“立即生成”和自然语言触发，不暗装系统定时器。
 
@@ -28,7 +28,7 @@ description: 为普通用户安装、体检和运行“半撇每日参谋”；�
 
 ## 每日运行
 
-1. 运行 `daily-chief doctor --json`，识别宿主、系统、本地库、调度和通知能力。
+1. 根据本轮真实可见的宿主工具刷新 `CapabilityReport`，运行 `daily-chief doctor --json --host-report <path>`，识别宿主、系统、本地库、调度和通知能力。
 2. 按能力选择顺序获取来源：
    - 当前宿主的已知适配器；
    - 根据工具说明做语义能力发现；
@@ -47,7 +47,8 @@ description: 为普通用户安装、体检和运行“半撇每日参谋”；�
 
 ```bash
 daily-chief doctor --json
-daily-chief serve
+daily-chief doctor --json --host-report <path>
+daily-chief serve --host-report <path>
 daily-chief ingest --source <id> --file <path>
 daily-chief generate --date <date> --format json|markdown
 daily-chief validate --file <path>

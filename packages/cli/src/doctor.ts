@@ -1,22 +1,9 @@
-import { accessSync, constants, existsSync } from "node:fs";
-import { homedir, platform } from "node:os";
-import { join } from "node:path";
+import { accessSync, constants, readFileSync } from "node:fs";
+import { platform } from "node:os";
 import { API_VERSION, capabilityReportSchema, type CapabilityReport, DailyChiefDatabase } from "@banpie/daily-chief-core";
 import { defaultDatabasePath } from "./paths.js";
 
-function detectHost(): string {
-  if (process.env.DAILY_CHIEF_AGENT_HOST) return process.env.DAILY_CHIEF_AGENT_HOST;
-  if (process.env.WORKBUDDY_HOME && !process.env.CODEX_HOME) return "WorkBuddy";
-  if (process.env.CODEX_HOME && !process.env.WORKBUDDY_HOME) return "Codex";
-  const workbuddyInstalled = existsSync(join(homedir(), ".workbuddy"));
-  const codexInstalled = existsSync(join(homedir(), ".codex"));
-  if (workbuddyInstalled && codexInstalled) return "Codex + WorkBuddy installed (current host unknown)";
-  if (workbuddyInstalled) return "WorkBuddy";
-  if (codexInstalled) return "Codex";
-  return "Generic Agent";
-}
-
-export function runDoctor(databasePath = defaultDatabasePath()): CapabilityReport {
+export function runDoctor(databasePath = defaultDatabasePath(), hostReportPath?: string): CapabilityReport {
   let databaseAvailable = false;
   let writable = false;
   let error: string | undefined;
@@ -30,8 +17,11 @@ export function runDoctor(databasePath = defaultDatabasePath()): CapabilityRepor
     error = caught instanceof Error ? caught.message : String(caught);
   }
 
-  const host = detectHost();
-  const adapters = [
+  const supplied = hostReportPath
+    ? capabilityReportSchema.parse(JSON.parse(readFileSync(hostReportPath, "utf8")))
+    : undefined;
+  const host = supplied?.agent_host ?? "Current host unknown";
+  const localAdapters = [
     {
       adapter_id: "local-tasks",
       api_version: API_VERSION,
@@ -57,15 +47,16 @@ export function runDoctor(databasePath = defaultDatabasePath()): CapabilityRepor
     }
   ];
 
+  const suppliedAdapters = supplied?.adapters.filter((adapter) => !["local-tasks", "standard-file-import"].includes(adapter.adapter_id)) ?? [];
   return capabilityReportSchema.parse({
     schema_version: API_VERSION,
     checked_at: new Date().toISOString(),
     agent_host: host,
     operating_system: platform(),
     node_version: process.version,
-    scheduler_available: process.env.DAILY_CHIEF_SCHEDULER_AVAILABLE === "1",
-    notification_available: process.env.DAILY_CHIEF_NOTIFICATION_AVAILABLE === "1",
-    adapters,
+    scheduler_available: supplied?.scheduler_available ?? false,
+    notification_available: supplied?.notification_available ?? false,
+    adapters: [...localAdapters, ...suppliedAdapters],
     local_database: {
       available: databaseAvailable,
       path: databasePath,

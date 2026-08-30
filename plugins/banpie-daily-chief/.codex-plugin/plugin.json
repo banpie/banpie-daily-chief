@@ -1,0 +1,37 @@
+{
+  "name": "banpie-daily-chief",
+  "version": "0.4.0-beta.1",
+  "description": "本地优先的每日规划、任务管理与真实来源能力体检",
+  "author": {
+    "name": "Banpie",
+    "url": "https://github.com/banpie"
+  },
+  "homepage": "https://github.com/banpie/banpie-daily-chief#readme",
+  "repository": "https://github.com/banpie/banpie-daily-chief",
+  "license": "Apache-2.0",
+  "keywords": ["daily-planning", "tasks", "local-first", "productivity"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "半撇每日参谋",
+    "shortDescription": "聚合日程与任务，生成少而可行的每日计划。",
+    "longDescription": "先体检 Codex 当前可用的数据源，再用本地任务库、可解释排序和确定性校验生成今日计划。外部来源默认只读，缺少插件或登录失效时仍可安全降级。",
+    "developerName": "Banpie",
+    "category": "Productivity",
+    "capabilities": ["Skills", "Local bridge", "Task management"],
+    "websiteURL": "https://github.com/banpie/banpie-daily-chief",
+    "privacyPolicyURL": "https://github.com/banpie/banpie-daily-chief/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/banpie/banpie-daily-chief/blob/main/LICENSE",
+    "defaultPrompt": [
+      "帮我安装并配置半撇每日参谋，先体检，预览成功后再问是否启用每日运行。",
+      "用半撇每日参谋为我生成今天的计划，并解释每项安排原因。",
+      "打开半撇每日参谋工作台，让我整理收集箱、任务和项目。"
+    ],
+    "brandColor": "#21322C",
+    "composerIcon": "./skills/banpie-daily-chief/assets/icon-small.svg",
+    "logo": "./skills/banpie-daily-chief/assets/icon-large.svg",
+    "screenshots": [
+      "./assets/today-desktop.png",
+      "./assets/today-mobile.png"
+    ]
+  }
+}
