@@ -23,7 +23,7 @@
     "sha256sums_sha256": "79c5631e707fc6cffa20881a05b01f3f7cbabba2d2b0aac72d0cb7eb9fcfc855"
   },
   "stable_release": {
-    "ci_workflow_run": "PENDING_STABLE_CI",
+    "ci_workflow_run": 33327298924,
     "release_workflow_run": "PENDING_STABLE_RELEASE",
     "artifacts_verified": false
   },
