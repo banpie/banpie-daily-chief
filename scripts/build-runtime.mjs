@@ -16,12 +16,22 @@ const binDirectory = join(stage, "bin");
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], windowsHide: true, ...options });
-  if (result.status !== 0) throw new Error(`${command} ${args.join(" ")} failed\n${result.stdout || ""}\n${result.stderr || ""}`);
+  if (result.status !== 0) {
+    const cause = result.error ? `${result.error.name}: ${result.error.message}` : "";
+    throw new Error(`${command} ${args.join(" ")} failed\n${cause}\n${result.stdout || ""}\n${result.stderr || ""}`);
+  }
   return result.stdout;
 }
 
+function runNpm(args, options = {}) {
+  if (process.platform === "win32") {
+    return run("cmd.exe", ["/d", "/s", "/c", "npm.cmd", ...args], options);
+  }
+  return run("npm", args, options);
+}
+
 function pack(workspace) {
-  const output = run(process.platform === "win32" ? "npm.cmd" : "npm", ["pack", "--json", "--pack-destination", temporary], { cwd: resolve(workspace) });
+  const output = runNpm(["pack", "--json", "--pack-destination", temporary], { cwd: resolve(workspace) });
   const result = JSON.parse(output);
   if (!Array.isArray(result) || !result[0]?.filename) throw new Error(`npm pack did not return an artifact for ${workspace}`);
   return join(temporary, basename(result[0].filename));
@@ -56,7 +66,7 @@ try {
   const coreArchive = pack("packages/core");
   const cliArchive = pack("packages/cli");
   writeFileSync(join(appDirectory, "package.json"), JSON.stringify({ private: true, type: "module" }, null, 2));
-  run(process.platform === "win32" ? "npm.cmd" : "npm", ["install", "--omit=dev", "--ignore-scripts=false", coreArchive, cliArchive], { cwd: appDirectory });
+  runNpm(["install", "--omit=dev", "--ignore-scripts=false", coreArchive, cliArchive], { cwd: appDirectory });
 
   const runtimeNode = join(binDirectory, process.platform === "win32" ? "node.exe" : "node");
   await installPortableNode(runtimeNode);
