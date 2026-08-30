@@ -1,6 +1,6 @@
 {
   "name": "@banpie/daily-chief-cli",
-  "version": "0.4.0-beta.1",
+  "version": "1.0.0-rc.1",
   "description": "半撇每日参谋本地 CLI 与网页服务",
   "license": "Apache-2.0",
   "type": "module",
@@ -26,7 +26,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@banpie/daily-chief-core": "0.4.0-beta.1",
+    "@banpie/daily-chief-core": "1.0.0-rc.1",
     "commander": "14.0.3",
     "csv-parse": "^7.0.2",
     "express": "^5.2.1",

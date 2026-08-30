@@ -2,7 +2,7 @@
 
 一个本地优先、宿主无关的每日工作参谋。它把日历、任务、邮件行动和人工输入归一化，选出少量真正要做的事，安排不重叠的时间块，并诚实显示每个来源是否读取成功。
 
-当前开发版本：`0.4.0-beta.1`。尚未完成新 Mac、新 Windows 和 WorkBuddy/Codex 真实定时运行验收，因此不冒充 `1.0.0`。
+当前候选版本：`1.0.0-rc.1`。自动化验证和双宿主公测验收已通过；待候选制品复验、私人版本真实日运行及稳定版发布收口后，才标记为 `1.0.0`。
 
 [English](README.en.md) · [隐私说明](PRIVACY.md) · [安全政策](SECURITY.md) · [适配器开发](docs/adapter-development.md)
 
@@ -59,7 +59,7 @@ node scripts/bridge.mjs doctor --json
 node scripts/bridge.mjs serve
 ```
 
-`@banpie/daily-chief-core` 与 CLI 的 npm 包结构已经完成并通过 `npm pack` 验证；首次 npm 发布仍需维护者完成注册表登录，因此当前预览安装以 GitHub 固定标签为准。
+`@banpie/daily-chief-core` 与 CLI 的 npm 包结构已经完成并通过 `npm pack` 验证；Agent 安装默认使用带 SHA-256 校验的 GitHub 固定标签制品。
 
 ## 仓库结构
 

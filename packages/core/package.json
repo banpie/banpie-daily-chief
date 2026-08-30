@@ -1,6 +1,6 @@
 {
   "name": "@banpie/daily-chief-core",
-  "version": "0.4.0-beta.1",
+  "version": "1.0.0-rc.1",
   "description": "宿主无关的每日规划契约、去重、排程与校验内核",
   "license": "Apache-2.0",
   "type": "module",

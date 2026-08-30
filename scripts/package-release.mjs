@@ -3,7 +3,7 @@ import { createWriteStream, mkdirSync, readFileSync, readdirSync, writeFileSync 
 import { basename, resolve } from "node:path";
 import { ZipArchive } from "archiver";
 
-const version = "0.4.0-beta.1";
+const version = "1.0.0-rc.1";
 const outputDirectory = resolve("release");
 mkdirSync(outputDirectory, { recursive: true });
 

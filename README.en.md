@@ -2,7 +2,7 @@
 
 A local-first, host-agnostic daily planning assistant. It normalizes calendars, tasks, actionable mail and manual input, selects a small number of realistic actions, creates non-overlapping time blocks, and reports source failures honestly.
 
-Current development release: `0.4.0-beta.1`. It is not labeled `1.0.0` until fresh macOS/Windows installs and real scheduled runs in WorkBuddy and Codex have passed.
+Current release candidate: `1.0.0-rc.1`. Automated checks and beta host acceptance have passed; the stable tag waits for candidate artifact verification, a private-edition daily run, and final publication checks.
 
 ## Agent-first installation
 
@@ -35,4 +35,4 @@ node packages/cli/dist/index.js serve
 
 The project uses TypeScript, Node.js 20+, SQLite, React, Zod JSON Schema, and Apache 2.0. See [adapter development](docs/adapter-development.md), [privacy](PRIVACY.md), and [security](SECURITY.md).
 
-The npm package layout for `@banpie/daily-chief-core` and the CLI is complete and passes `npm pack`. Until the maintainer finishes the first npm registry login, this preview installs from the pinned GitHub release instead.
+The npm package layout for `@banpie/daily-chief-core` and the CLI is complete and passes `npm pack`. Agent installation defaults to SHA-256-verified artifacts from a pinned GitHub release.
