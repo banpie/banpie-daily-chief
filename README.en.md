@@ -2,7 +2,7 @@
 
 A local-first, host-agnostic daily planning assistant. It normalizes calendars, tasks, actionable mail and manual input, selects a small number of realistic actions, creates non-overlapping time blocks, and reports source failures honestly.
 
-Current stable release: `1.0.0`. Automated, cross-platform artifact, dual-host natural-language and native-schedule, degradation, and security acceptance checks have passed. See the [1.0 acceptance report](docs/verification/1.0.0-evidence.md).
+Current stable release: `1.0.1`. Automated, cross-platform artifact, dual-host natural-language and native-schedule, degradation, and security acceptance checks have passed. See the [1.0.1 acceptance report](docs/verification/1.0.1-evidence.md).
 
 ## Agent-first installation
 

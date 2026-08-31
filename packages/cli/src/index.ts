@@ -12,7 +12,7 @@ import { defaultDatabasePath } from "./paths.js";
 import { startServer } from "./server.js";
 
 const program = new Command();
-program.name("daily-chief").description("半撇每日参谋本地 CLI").version("1.0.0");
+program.name("daily-chief").description("半撇每日参谋本地 CLI").version("1.0.1");
 program.option("--database <path>", "SQLite database path", defaultDatabasePath());
 
 program.command("doctor")

@@ -79,6 +79,15 @@ describe("normalization and planning", () => {
     expect(brief.time_blocks.filter((block) => block.editable).every((block) => new Date(block.start_at) >= late)).toBe(true);
   });
 
+  it("leaves enough lead time to review and accept a newly generated plan", () => {
+    const duringWork = new Date("2026-08-27T01:17:31.000Z");
+    const brief = generateDailyBrief({ date: "2026-08-27", now: duringWork, settings: defaultSettings, snapshots: [snapshot()] });
+    const firstEditable = brief.time_blocks.find((block) => block.editable);
+    expect(firstEditable).toBeDefined();
+    expect(new Date(firstEditable!.start_at).getTime() - duringWork.getTime()).toBeGreaterThanOrEqual(5 * 60_000);
+    expect(new Date(firstEditable!.start_at).getUTCMinutes() % 5).toBe(0);
+  });
+
   it("prioritizes a real deadline over a low-risk someday item", () => {
     const due = candidate({ candidate_id: "due", title: "今天交材料", due_at: "2026-08-27T10:00:00+08:00", priority: "p2" });
     const someday = candidate({ candidate_id: "later", title: "以后研究", status: "someday", priority: "p0" });

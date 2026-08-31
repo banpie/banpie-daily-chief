@@ -90,3 +90,41 @@ jobs:
           files: |
             release/*.zip
             release/SHA256SUMS
+
+  publish-npm:
+    needs: [validation, runtime, release]
+    if: ${{ !contains(github.ref_name, '-') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run check
+      - name: 校验稳定标签与包版本
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+
+          const tag = process.env.GITHUB_REF_NAME;
+          const match = /^v(\d+\.\d+\.\d+)$/.exec(tag);
+          if (!match) throw new Error(`npm 只接受稳定语义化标签，当前为 ${tag}`);
+
+          for (const path of ["packages/core/package.json", "packages/cli/package.json"]) {
+            const pkg = JSON.parse(readFileSync(path, "utf8"));
+            if (pkg.version !== match[1]) {
+              throw new Error(`${pkg.name} 版本 ${pkg.version} 与标签 ${tag} 不一致`);
+            }
+          }
+          NODE
+      - name: 发布公共核心包
+        run: npm publish -w @banpie/daily-chief-core --access public
+      - name: 发布命令行包
+        run: npm publish -w @banpie/daily-chief-cli --access public

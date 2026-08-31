@@ -21,6 +21,16 @@ export interface GenerateBriefInput {
 
 const zonedInstant = (date: string, time: string, timezone: string): Date => fromZonedTime(`${date}T${time}:00`, timezone);
 const iso = (date: Date): string => date.toISOString();
+const planningStepMinutes = 5;
+const planningLeadMinutes = 5;
+
+function planningStart(date: string, settings: Settings, now: Date): Date {
+  const workStart = zonedInstant(date, settings.work_start, settings.timezone);
+  if (workStart.getTime() > now.getTime()) return workStart;
+  const stepMilliseconds = planningStepMinutes * 60_000;
+  const earliest = addMinutes(now, planningLeadMinutes);
+  return new Date(Math.ceil(earliest.getTime() / stepMilliseconds) * stepMilliseconds);
+}
 
 function isDueOnOrBefore(candidate: Candidate, date: string, timezone: string): boolean {
   if (!candidate.due_at) return false;
@@ -71,9 +81,8 @@ function fixedEvents(candidates: Candidate[], date: string, timezone: string): C
 
 function usableActionMinutes(input: GenerateBriefInput, events: Candidate[]): number {
   const now = input.now ?? new Date();
-  const start = zonedInstant(input.date, input.settings.work_start, input.settings.timezone);
   const end = zonedInstant(input.date, input.settings.work_end, input.settings.timezone);
-  const effectiveStart = isBefore(start, now) ? now : start;
+  const effectiveStart = planningStart(input.date, input.settings, now);
   if (!isBefore(effectiveStart, end)) return 0;
   const occupied = [
     { start: zonedInstant(input.date, input.settings.lunch_start, input.settings.timezone), end: zonedInstant(input.date, input.settings.lunch_end, input.settings.timezone) },
@@ -91,11 +100,10 @@ function usableActionMinutes(input: GenerateBriefInput, events: Candidate[]): nu
 function allocateBlocks(actions: DailyBrief["actions"], events: Candidate[], input: GenerateBriefInput): DailyBrief["time_blocks"] {
   const { date, settings } = input;
   const now = input.now ?? new Date();
-  const workStart = zonedInstant(date, settings.work_start, settings.timezone);
   const workEnd = zonedInstant(date, settings.work_end, settings.timezone);
   const lunchStart = zonedInstant(date, settings.lunch_start, settings.timezone);
   const lunchEnd = zonedInstant(date, settings.lunch_end, settings.timezone);
-  const cursorFloor = isBefore(workStart, now) ? now : workStart;
+  const cursorFloor = planningStart(date, settings, now);
 
   const fixed = events.flatMap((event) => {
     if (!event.start_at || !event.end_at || event.all_day) return [];

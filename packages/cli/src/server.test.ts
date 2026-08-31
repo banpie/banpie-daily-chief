@@ -31,9 +31,14 @@ async function setup() {
     }],
     local_database: { available: true, path: "host-owned", writable: true }
   }));
-  const server = await startServer({ port: 0, openBrowser: false, databasePath: join(directory, "data.sqlite"), token: "test-token", hostReportPath: reportPath });
+  let current = new Date("2026-08-27T01:17:31.000Z");
+  const server = await startServer({ port: 0, openBrowser: false, databasePath: join(directory, "data.sqlite"), token: "test-token", hostReportPath: reportPath, now: () => current });
   servers.push(server.close);
-  return { base: server.url.split("/?")[0]!, auth: { Authorization: `Bearer ${server.token}`, "Content-Type": "application/json" } };
+  return {
+    base: server.url.split("/?")[0]!,
+    auth: { Authorization: `Bearer ${server.token}`, "Content-Type": "application/json" },
+    advance: (milliseconds: number) => { current = new Date(current.getTime() + milliseconds); }
+  };
 }
 
 describe("local API security and onboarding", () => {
@@ -65,7 +70,7 @@ describe("local API security and onboarding", () => {
   });
 
   it("creates an idempotent three-task preview and accepts its daily plan", async () => {
-    const { base, auth } = await setup();
+    const { base, auth, advance } = await setup();
     const tasks = [
       { draft_id: "one", title: "第一项", estimate_minutes: 60, priority: "p1" },
       { draft_id: "two", title: "第二项", estimate_minutes: 30, priority: "p2" },
@@ -80,9 +85,11 @@ describe("local API security and onboarding", () => {
     expect(second.brief.actions).toHaveLength(3);
     const bootstrap = await fetch(`${base}/api/bootstrap`, { headers: auth }).then((response) => response.json()) as { tasks: unknown[] };
     expect(bootstrap.tasks).toHaveLength(3);
+    advance(60_000);
     const accepted = await fetch(`${base}/api/plans/${first.plan.date}`, { method: "PATCH", headers: auth, body: JSON.stringify({ accepted: true }) });
-    expect(accepted.status).toBe(200);
-    expect((await accepted.json() as { accepted: boolean }).accepted).toBe(true);
+    const acceptedBody = await accepted.json() as { accepted?: boolean; error?: string };
+    expect(accepted.status, acceptedBody.error).toBe(200);
+    expect(acceptedBody.accepted).toBe(true);
   });
 
   it("rejects overlapping time-block edits and never serves a traversed package file", async () => {

@@ -17,6 +17,8 @@
     "private_ruby_runs": 47,
     "private_ruby_assertions": 455,
     "private_python_tests": 30,
+    "private_stable_pin_commit": "aaa569bd",
+    "private_registry_bridge": "passed",
     "private_daily_run": "PENDING_PRIVATE_DAILY_RUN"
   },
   "candidate_release": {
@@ -33,7 +35,17 @@
     "runtime_node_version": "v22.23.2"
   },
   "npm": {
-    "core": "PENDING_NPM_CORE",
-    "cli": "PENDING_NPM_CLI"
+    "core": {
+      "version": "1.0.0",
+      "public": true,
+      "clean_install": "passed",
+      "integrity": "sha512-mtBbGRLS4A23vCNCsUpzid2axSsUBaibZn64fZkrhNpR01L4U3D6ywXBisyZU6+6K2Yhw2QbkJVhgryhECli4w=="
+    },
+    "cli": {
+      "version": "1.0.0",
+      "public": true,
+      "clean_install": "passed",
+      "integrity": "sha512-qtY6g3xQozo7Npg0heJxPLEV8Cyq9BvQMM8Mqn0vWfcBEJp5xD49K2oYGLQrFeijXk7eIyq8cRmnNtptFYHDBg=="
+    }
   }
 }

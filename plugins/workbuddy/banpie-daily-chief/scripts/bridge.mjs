@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir, platform } from "node:os";
 import { join, resolve } from "node:path";
 
-const VERSION = "1.0.0";
+const VERSION = "1.0.1";
 const args = process.argv.slice(2);
 const localCommand = process.platform === "win32" ? "daily-chief.cmd" : "daily-chief";
 const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";

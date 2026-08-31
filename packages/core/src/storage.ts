@@ -375,13 +375,13 @@ export class DailyChiefDatabase {
 
   latestBrief(date?: string): DailyBrief | undefined {
     const row = date
-      ? this.db.prepare("SELECT payload FROM daily_briefs WHERE brief_date = ? ORDER BY generated_at DESC LIMIT 1").get(date)
-      : this.db.prepare("SELECT payload FROM daily_briefs ORDER BY generated_at DESC LIMIT 1").get();
+      ? this.db.prepare("SELECT payload FROM daily_briefs WHERE brief_date = ? ORDER BY generated_at DESC, rowid DESC LIMIT 1").get(date)
+      : this.db.prepare("SELECT payload FROM daily_briefs ORDER BY generated_at DESC, rowid DESC LIMIT 1").get();
     return row ? dailyBriefSchema.parse(JSON.parse((row as { payload: string }).payload)) : undefined;
   }
 
   listBriefs(limit = 30): DailyBrief[] {
-    return (this.db.prepare("SELECT payload FROM daily_briefs ORDER BY generated_at DESC LIMIT ?").all(limit) as Array<{ payload: string }>)
+    return (this.db.prepare("SELECT payload FROM daily_briefs ORDER BY generated_at DESC, rowid DESC LIMIT ?").all(limit) as Array<{ payload: string }>)
       .map((row) => dailyBriefSchema.parse(JSON.parse(row.payload)));
   }
 

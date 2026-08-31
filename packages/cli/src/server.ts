@@ -28,6 +28,7 @@ export interface ServeOptions {
   databasePath: string;
   token?: string;
   hostReportPath?: string;
+  now?: () => Date;
 }
 
 const publicDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
@@ -53,6 +54,7 @@ export async function startServer(options: ServeOptions): Promise<{ url: string;
   const db = new DailyChiefDatabase(options.databasePath);
   const token = options.token ?? randomBytes(24).toString("base64url");
   const doctor = runDoctor(options.databasePath, options.hostReportPath);
+  const now = options.now ?? (() => new Date());
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "1mb" }));
@@ -67,14 +69,15 @@ export async function startServer(options: ServeOptions): Promise<{ url: string;
   app.get("/api/bootstrap", (_request, response) => {
     const settings = db.getSettings();
     const tasks = db.listTasks();
-    const occurrenceDate = dateInTimezone(settings.timezone);
+    const current = now();
+    const occurrenceDate = dateInTimezone(settings.timezone, current);
     response.json({
       settings,
       tasks,
       recurring_occurrences_today: tasks.filter((task) => task.recurrence_rrule && taskOccursOn(task, occurrenceDate, settings.timezone)).map((task) => task.task_id),
       completed_occurrences_today: tasks.filter((task) => task.recurrence_rrule && db.isTaskOccurrenceCompleted(task.task_id, occurrenceDate)).map((task) => task.task_id),
       projects: db.listProjects(),
-      snapshots: db.latestSnapshots(),
+      snapshots: db.latestSnapshots(current),
       brief: db.latestBrief(),
       plan: db.latestBrief() ? db.getDailyPlan(db.latestBrief()!.date) ?? null : null,
       onboarding: db.getOnboardingState(),
@@ -168,7 +171,8 @@ export async function startServer(options: ServeOptions): Promise<{ url: string;
       state.seed_task_ids.slice(drafts.length).forEach((taskId) => {
         if (db.getTask(taskId)) db.updateTask(taskId, { status: "canceled" });
       });
-      const { brief, plan } = generateFromDatabase(db, onboardingPreviewDate(db.getSettings()));
+      const current = now();
+      const { brief, plan } = generateFromDatabase(db, onboardingPreviewDate(db.getSettings(), current), current);
       const onboarding = db.saveOnboardingState({ current_step: 7, draft_tasks: drafts, seed_task_ids: taskIds, preview_brief_id: brief.brief_id });
       response.json({ onboarding, brief, plan });
     } catch (caught) {
@@ -199,7 +203,7 @@ export async function startServer(options: ServeOptions): Promise<{ url: string;
   app.get("/api/briefs/latest", (request, response) => response.json(db.latestBrief(typeof request.query.date === "string" ? request.query.date : undefined) ?? null));
   app.post("/api/generate", (request, response) => {
     try {
-      response.json(generateFromDatabase(db, typeof request.body?.date === "string" ? request.body.date : undefined).brief);
+      response.json(generateFromDatabase(db, typeof request.body?.date === "string" ? request.body.date : undefined, now()).brief);
     } catch (caught) {
       response.status(422).json({ error: caught instanceof Error ? caught.message : String(caught) });
     }
@@ -218,9 +222,9 @@ export async function startServer(options: ServeOptions): Promise<{ url: string;
         brief_id: current.brief_id,
         created_at: current.created_at,
         adjusted: request.body?.time_blocks !== undefined || request.body?.action_order !== undefined ? true : current.adjusted,
-        updated_at: new Date().toISOString()
+        updated_at: now().toISOString()
       }) as DailyPlan;
-      const validation = validateDailyPlan(candidate, brief);
+      const validation = validateDailyPlan(candidate, brief, now());
       if (!validation.valid) return response.status(422).json({ error: validation.issues.map((issue) => issue.message).join(" "), issues: validation.issues });
       response.json(db.saveDailyPlan(candidate));
     } catch (caught) {
