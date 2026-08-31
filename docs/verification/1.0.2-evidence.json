@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "release_version": "1.0.2",
   "report_date": "2026-08-31",
-  "status": "PENDING_PRIVATE_DAILY_RUN",
+  "status": "PASS",
   "baseline_report": "docs/verification/1.0.1-evidence.json",
   "patch_scope": [
     "explicit npm repository metadata for Sigstore provenance",
@@ -14,6 +14,6 @@
     "npm_core": "PASS:sha512-rCyRcbyki26YNT+tPUpwvQe2DjuXidaiQUyvGA83UPw27nAKpvhD8XpnnaPR3o7QjF6tLHgLt5sEIeZ8qvrVpw==",
     "npm_cli": "PASS:sha512-WR58fZ8ujeJEO0uedIN8kvkw2RURYp4As2D4cXew/w2M5vbxFPYa46XtbcBNzaBTbGAAQuylhjpD9dSgXv0GTg==",
     "private_pin": "PASS:ba30026f; ruby=47/455; python=30; bridge=1.0.2/1.0",
-    "private_daily_run": "PENDING_PRIVATE_DAILY_RUN"
+    "private_daily_run": "PASS:2026-08-31T10:10:47+08:00; source_collection_seconds=202; core=1.0.2; candidates=55; final_validator=58_lines/2091_visible_chars; delivered=true; optional_source_degradation=safe"
   }
 }
