@@ -1,9 +1,13 @@
 {
   "name": "banpie-daily-chief",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "半撇每日参谋：本地优先、宿主无关的每日规划工具",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/banpie/banpie-daily-chief"
+  },
   "type": "module",
   "engines": {
     "node": ">=20"

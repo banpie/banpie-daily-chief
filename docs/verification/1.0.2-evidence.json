@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "release_version": "1.0.2",
+  "report_date": "2026-08-31",
+  "status": "PENDING_FINAL_ACCEPTANCE",
+  "baseline_report": "docs/verification/1.0.1-evidence.json",
+  "patch_scope": [
+    "explicit npm repository metadata for Sigstore provenance",
+    "trusted GitHub Actions npm publishing without long-lived tokens"
+  ],
+  "evidence": {
+    "ci": "PENDING_PATCH_CI",
+    "release": "PENDING_PATCH_RELEASE",
+    "npm_core": "PENDING_NPM_PATCH",
+    "npm_cli": "PENDING_NPM_PATCH",
+    "private_pin": "PENDING_PRIVATE_PATCH_PIN",
+    "private_daily_run": "PENDING_PRIVATE_DAILY_RUN"
+  }
+}

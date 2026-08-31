@@ -1,8 +1,12 @@
 {
   "name": "@banpie/daily-chief-core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "宿主无关的每日规划契约、去重、排程与校验内核",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/banpie/banpie-daily-chief"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

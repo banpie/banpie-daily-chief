@@ -6,7 +6,7 @@ import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync
 import { homedir, platform, arch, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 
-const VERSION = "1.0.1";
+const VERSION = "1.0.2";
 const TAG = `v${VERSION}`;
 const RELEASE_ROOT = process.env.DAILY_CHIEF_RELEASE_ROOT || `https://github.com/banpie/banpie-daily-chief/releases/download/${TAG}`;
 

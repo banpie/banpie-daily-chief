@@ -43,7 +43,7 @@ node scripts/bridge.mjs serve --host-report <capability-report.json>
 源码和 npm 安装只面向开发者，不是新人路径：
 
 ```bash
-npm install --global @banpie/daily-chief-cli@1.0.1
+npm install --global @banpie/daily-chief-cli@1.0.2
 daily-chief doctor --json
 daily-chief serve
 ```
