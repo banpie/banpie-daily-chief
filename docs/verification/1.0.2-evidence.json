@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "release_version": "1.0.2",
   "report_date": "2026-08-31",
-  "status": "PENDING_FINAL_ACCEPTANCE",
+  "status": "PENDING_PRIVATE_DAILY_RUN",
   "baseline_report": "docs/verification/1.0.1-evidence.json",
   "patch_scope": [
     "explicit npm repository metadata for Sigstore provenance",
     "trusted GitHub Actions npm publishing without long-lived tokens"
   ],
   "evidence": {
-    "ci": "PENDING_PATCH_CI",
-    "release": "PENDING_PATCH_RELEASE",
-    "npm_core": "PENDING_NPM_PATCH",
-    "npm_cli": "PENDING_NPM_PATCH",
-    "private_pin": "PENDING_PRIVATE_PATCH_PIN",
+    "ci": "PASS:https://github.com/banpie/banpie-daily-chief/actions/runs/33348570322",
+    "release": "PASS:https://github.com/banpie/banpie-daily-chief/releases/tag/v1.0.2",
+    "npm_core": "PASS:sha512-rCyRcbyki26YNT+tPUpwvQe2DjuXidaiQUyvGA83UPw27nAKpvhD8XpnnaPR3o7QjF6tLHgLt5sEIeZ8qvrVpw==",
+    "npm_cli": "PASS:sha512-WR58fZ8ujeJEO0uedIN8kvkw2RURYp4As2D4cXew/w2M5vbxFPYa46XtbcBNzaBTbGAAQuylhjpD9dSgXv0GTg==",
+    "private_pin": "PASS:ba30026f; ruby=47/455; python=30; bridge=1.0.2/1.0",
     "private_daily_run": "PENDING_PRIVATE_DAILY_RUN"
   }
 }
